@@ -1,0 +1,30 @@
+{
+  "name": "el3abha",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "prisma": "^8.0.0-rc.23"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "postinstall": "prisma skills sync || exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/omar-gamal18/El3abha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/omar-gamal18/El3abha/issues"
+  },
+  "homepage": "https://github.com/omar-gamal18/El3abha#readme",
+  "dependencies": {
+    "dotenv": "^18.0.8"
+  }
+}
