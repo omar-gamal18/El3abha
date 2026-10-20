@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/omar-gamal18/El3abha#readme",
   "dependencies": {
+    "@prisma/client": "^7.10.1",
     "dotenv": "^18.0.8"
   }
 }
