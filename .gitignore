@@ -1,3 +1,6 @@
 tasks_breakdown.md
 node_modules
 .env
+node_modules/
+dist/
+.prisma/

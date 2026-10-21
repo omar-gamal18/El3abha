@@ -1,0 +1,171 @@
+[
+  {
+    "id": "column.public.User.deletedAt",
+    "label": "Add column \"deletedAt\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "deletedAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"deletedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "deletedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"deletedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"deletedAt\" timestamp(3)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"deletedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "deletedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "setDefault.User.isActive",
+    "label": "Set default on \"User\".\"isActive\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "isActive",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"isActive\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "isActive"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "set default on \"isActive\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"isActive\" SET DEFAULT true"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"isActive\" has a default",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "isActive"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterType.User.phone",
+    "label": "Alter type of \"User\".\"phone\" to text",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "phone",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"phone\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "phone"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"phone\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"phone\" TYPE text USING \"phone\"::text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"phone\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "phone",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "index.User.User_phone_key",
+    "label": "Create index \"User_phone_key\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_phone_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_phone_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_phone_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_phone_key\"",
+        "sql": "CREATE UNIQUE INDEX \"User_phone_key\" ON \"public\".\"User\" (\"phone\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_phone_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_phone_key\""
+        ]
+      }
+    ]
+  }
+]

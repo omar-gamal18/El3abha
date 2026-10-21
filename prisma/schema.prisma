@@ -10,14 +10,16 @@ model User {
     id        Int      @id @default(autoincrement())
     name      String
     email     String   @unique
-    phone     Int
+    phone     String   @unique
     password  String
     role      UserRole
-    isActive  Boolean
+    isActive  Boolean  @default(true)
     createdAt DateTime @default(now())
+    deletedAt DateTime?
 }
 
 enum UserRole {
     PLAYER
     OWNER
+    ADMIN
 }

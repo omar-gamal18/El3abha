@@ -4,13 +4,16 @@
   "description": "",
   "main": "app.js",
   "devDependencies": {
+    "@prisma/cli-engine": "^0.9.0",
     "@types/node": "^26.6.5",
-    "prisma": "^8.0.0-rc.23"
+    "prisma": "^8.0.0-rc.24"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "postinstall": "prisma skills sync || exit 0"
+    "start": "node src/server.js",
+    "contract:emit": "prisma contract emit",
+    "migrate": "prisma contract emit && prisma migration plan && prisma db migrate && prisma db sign",
+    "db:update": "prisma contract emit && prisma db update && prisma db sign"
   },
   "repository": {
     "type": "git",
@@ -26,6 +29,7 @@
   "homepage": "https://github.com/omar-gamal18/El3abha#readme",
   "dependencies": {
     "@prisma/client": "^7.10.1",
+    "@prisma/orm-postgres": "^8.0.0-rc.18",
     "dotenv": "^18.0.8"
   }
 }
