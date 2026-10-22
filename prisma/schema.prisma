@@ -7,14 +7,15 @@ generator client {
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
+    id        Int       @id @default(autoincrement())
     name      String
-    email     String   @unique
-    phone     String   @unique
+    email     String    @unique
+    phone     String    @unique
     password  String
     role      UserRole
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
+    isActive  Boolean   @default(true)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
     deletedAt DateTime?
 }
 
