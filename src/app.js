@@ -15,10 +15,8 @@ app.use(express.json());
 
 app.get("/api/health", (req, res) => res.status(200).send("Home"));
 
-// Handle unknown routes
 app.use(notFound);
 
-// Global error handler (must be last)
 app.use(errorHandler);
 
 module.exports = app;

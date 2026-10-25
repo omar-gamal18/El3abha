@@ -1,4 +1,4 @@
-const successResponse = (data, message = "Success", meta = undefined) => {
+const successResponse = (data, message = "Success", meta) => {
   const response = {
     success: true,
     message,
