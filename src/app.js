@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-require("dotenv").config();
+
+const notFound = require("./middleware/notFound");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -13,14 +15,10 @@ app.use(express.json());
 
 app.get("/api/health", (req, res) => res.status(200).send("Home"));
 
-app.use((req, res) => {
-  res.status(404).json({ error: "Not Found", path: req.originalUrl });
-});
+// Handle unknown routes
+app.use(notFound);
 
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ error: "Internal Server Error" });
-});
+// Global error handler (must be last)
+app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+module.exports = app;
