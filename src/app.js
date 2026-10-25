@@ -1,6 +1,13 @@
 const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+require("dotenv").config();
 
 const app = express();
+
+app.use(helmet());
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -15,4 +22,5 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: "Internal Server Error" });
 });
 
-app.listen(3000);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
