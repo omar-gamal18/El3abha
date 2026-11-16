@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const AppError = require("./errors/AppError");
+const AppError = require("../utils/AppError");
 const { sendSuccess } = require("../utils/apiResponse");
 const db = require("../prismaClient");
 
@@ -33,7 +33,7 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  const user = await User.whereUnique({ email: req.body.email }).first();
+  const user = await User.first({ email: req.body.email });
 
   if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
     return next(new AppError("Invalid email or password", 401));

@@ -86,6 +86,16 @@
                     "typeName": "UserRole"
                   }
                 }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamp-string@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
               }
             },
             "relations": {},
@@ -117,6 +127,9 @@
                 },
                 "role": {
                   "column": "role"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
                 }
               },
               "namespaceId": "public",
@@ -216,6 +229,14 @@
                     "namespaceId": "public",
                     "plane": "storage"
                   }
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamp-string@1",
+                  "dataType": "pg/timestamp",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
                 }
               },
               "foreignKeys": [],
@@ -258,7 +279,29 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "bc19f812ea76ecbeb4ba93c37d6a1c78dd75632887d6682f889639f47d7144b1"
+    "storageHash": "96ccda060b15ff222d43c590eb45562478dab8cd390af66b11f707acdf8c770f"
+  },
+  "execution": {
+    "executionHash": "76ee8948067fff39e1b787eafdf2c9319ebe5e0f5029f71536b4f58b92d7790e",
+    "mutations": {
+      "defaults": [
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "User",
+            "field": "updatedAt",
+            "namespace": "public"
+          }
+        }
+      ]
+    }
   },
   "capabilities": {
     "postgres": {

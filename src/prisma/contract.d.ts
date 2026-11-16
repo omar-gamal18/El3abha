@@ -21,8 +21,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'bc19f812ea76ecbeb4ba93c37d6a1c78dd75632887d6682f889639f47d7144b1'>;
-export type ExecutionHash = ExecutionHashBase<string>;
+  StorageHashBase<'96ccda060b15ff222d43c590eb45562478dab8cd390af66b11f707acdf8c770f'>;
+export type ExecutionHash =
+  ExecutionHashBase<'76ee8948067fff39e1b787eafdf2c9319ebe5e0f5029f71536b4f58b92d7790e'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -246,6 +247,7 @@ export type FieldOutputTypes = {
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -261,6 +263,7 @@ export type FieldInputTypes = {
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -276,6 +279,7 @@ export type StorageColumnTypes = {
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -291,6 +295,7 @@ export type StorageColumnInputTypes = {
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -306,6 +311,7 @@ export namespace Models {
     password: CodecTypes['pg/text@1']['output'];
     phone: CodecTypes['pg/text@1']['output'];
     role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    updatedAt: TimestampString<3>;
     readonly [RelationKeys]?: never;
   };
 }
@@ -402,6 +408,13 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly typeName: 'UserRole' };
                   readonly many: false;
                 };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
@@ -492,6 +505,14 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly typeName: 'UserRole' };
                 };
               };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
             };
             readonly relations: Record<string, never>;
             readonly storage: {
@@ -507,6 +528,7 @@ type ContractBase = Omit<
                 readonly password: { readonly column: 'password' };
                 readonly phone: { readonly column: 'phone' };
                 readonly role: { readonly column: 'role' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -542,6 +564,22 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
+  readonly execution: {
+    readonly executionHash: ExecutionHash;
+    readonly mutations: {
+      readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'User';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+      ];
+    };
+  };
   readonly meta: {};
 
   readonly profileHash: ProfileHash;
