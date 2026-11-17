@@ -68,3 +68,31 @@ exports.login = async (req, res, next) => {
 
   return sendAuthResponse(res, user, "User logged in successfully", 200);
 };
+
+exports.refresh = async (req, res, next) => {
+  const refreshToken = req.cookies[REFRESH_COOKIE];
+  if (!refreshToken) {
+    return next(new AppError("Refresh token not found", 401));
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  } catch (err) {
+    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
+    return next(new AppError("Invalid or expired refresh token", 401));
+  }
+
+  const user = await User.first({ id: payload.userId });
+  if (!user) {
+    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
+    return next(new AppError("User not found", 404));
+  }
+
+  return sendSuccess(
+    res,
+    { token: signAccessToken(user) },
+    " token refreshed successfully",
+    200,
+  );
+};
