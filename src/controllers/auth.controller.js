@@ -7,10 +7,39 @@ const db = require("../prismaClient");
 
 const User = db.orm.public.User;
 
-const generateToken = (user) =>
-  jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+const REFRESH_COOKIE = "refresh_token";
+const REFRESH_DAYS = +process.env.JWT_REFRESH_EXPIRES_DAYS;
+
+const signAccessToken = (user) =>
+  jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
+    expiresIn: process.env.JWT_ACCESS_EXPIRES_MINUTES,
   });
+
+const signRefreshToken = (user) =>
+  jwt.sign({ userId: user.id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: `${REFRESH_DAYS}d`,
+  });
+
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/api/v1/auth",
+  maxAge: REFRESH_DAYS * 24 * 60 * 60 * 1000,
+};
+
+const sendAuthResponse = (res, user, message, statusCode) => {
+  res.cookie(REFRESH_COOKIE, signRefreshToken(user.id), refreshCookieOptions);
+
+  const { password, ...safeUser } = user;
+
+  return sendSuccess(
+    res,
+    { user: safeUser, token: signAccessToken(user.id) },
+    message,
+    statusCode,
+  );
+};
 
 exports.signup = async (req, res, next) => {
   const { name, email, phone, password, role } = req.body;
@@ -27,9 +56,7 @@ exports.signup = async (req, res, next) => {
     },
   );
 
-  const token = generateToken(user);
-
-  return sendSuccess(res, { user, token }, "User created successfully", 201);
+  return sendAuthResponse(res, user, "User created successfully", 201);
 };
 
 exports.login = async (req, res, next) => {
@@ -39,7 +66,5 @@ exports.login = async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
 
-  const token = generateToken(user);
-
-  return sendSuccess(res, { user, token }, "User logged in successfully", 200);
+  return sendAuthResponse(res, user, "User logged in successfully", 200);
 };
