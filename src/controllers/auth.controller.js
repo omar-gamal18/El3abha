@@ -96,3 +96,8 @@ exports.refresh = async (req, res, next) => {
     200,
   );
 };
+
+exports.logout = (req, res) => {
+  res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
+  return res.status(204).send();
+};
