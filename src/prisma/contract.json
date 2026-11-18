@@ -25,16 +25,6 @@
                   }
                 }
               },
-              "deletedAt": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/timestamp-string@1",
-                  "kind": "scalar",
-                  "typeParams": {
-                    "precision": 3
-                  }
-                }
-              },
               "email": {
                 "nullable": false,
                 "type": {
@@ -70,6 +60,23 @@
                   "kind": "scalar"
                 }
               },
+              "passwordResetCode": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "passwordResetExpires": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamp-string@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
               "phone": {
                 "nullable": false,
                 "type": {
@@ -86,16 +93,6 @@
                     "typeName": "UserRole"
                   }
                 }
-              },
-              "updatedAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamp-string@1",
-                  "kind": "scalar",
-                  "typeParams": {
-                    "precision": 3
-                  }
-                }
               }
             },
             "relations": {},
@@ -103,9 +100,6 @@
               "fields": {
                 "createdAt": {
                   "column": "createdAt"
-                },
-                "deletedAt": {
-                  "column": "deletedAt"
                 },
                 "email": {
                   "column": "email"
@@ -122,14 +116,17 @@
                 "password": {
                   "column": "password"
                 },
+                "passwordResetCode": {
+                  "column": "passwordResetCode"
+                },
+                "passwordResetExpires": {
+                  "column": "passwordResetExpires"
+                },
                 "phone": {
                   "column": "phone"
                 },
                 "role": {
                   "column": "role"
-                },
-                "updatedAt": {
-                  "column": "updatedAt"
                 }
               },
               "namespaceId": "public",
@@ -170,14 +167,6 @@
                     "precision": 3
                   }
                 },
-                "deletedAt": {
-                  "codecId": "pg/timestamp-string@1",
-                  "dataType": "pg/timestamp",
-                  "nullable": true,
-                  "typeParams": {
-                    "precision": 3
-                  }
-                },
                 "email": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -211,6 +200,19 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "passwordResetCode": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "passwordResetExpires": {
+                  "codecId": "pg/timestamp-string@1",
+                  "dataType": "pg/timestamp",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
                 "phone": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -228,14 +230,6 @@
                     "entityName": "UserRole",
                     "namespaceId": "public",
                     "plane": "storage"
-                  }
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamp-string@1",
-                  "dataType": "pg/timestamp",
-                  "nullable": false,
-                  "typeParams": {
-                    "precision": 3
                   }
                 }
               },
@@ -279,29 +273,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "96ccda060b15ff222d43c590eb45562478dab8cd390af66b11f707acdf8c770f"
-  },
-  "execution": {
-    "executionHash": "76ee8948067fff39e1b787eafdf2c9319ebe5e0f5029f71536b4f58b92d7790e",
-    "mutations": {
-      "defaults": [
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "onUpdate": {
-            "id": "timestampNow",
-            "kind": "generator"
-          },
-          "ref": {
-            "entry": "User",
-            "field": "updatedAt",
-            "namespace": "public"
-          }
-        }
-      ]
-    }
+    "storageHash": "b01b4120221257b2b2d93b61cf7d12f002690a8d388a55214c0e636eef404c94"
   },
   "capabilities": {
     "postgres": {

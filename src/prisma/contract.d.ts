@@ -21,9 +21,8 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'96ccda060b15ff222d43c590eb45562478dab8cd390af66b11f707acdf8c770f'>;
-export type ExecutionHash =
-  ExecutionHashBase<'76ee8948067fff39e1b787eafdf2c9319ebe5e0f5029f71536b4f58b92d7790e'>;
+  StorageHashBase<'b01b4120221257b2b2d93b61cf7d12f002690a8d388a55214c0e636eef404c94'>;
+export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -239,15 +238,15 @@ export type FieldOutputTypes = {
   readonly public: {
     readonly User: {
       readonly createdAt: TimestampString<3>;
-      readonly deletedAt: TimestampString<3> | null;
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
+      readonly passwordResetExpires: TimestampString<3> | null;
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
-      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -255,15 +254,15 @@ export type FieldInputTypes = {
   readonly public: {
     readonly User: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
-      readonly deletedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
+      readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
-      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -271,15 +270,15 @@ export type StorageColumnTypes = {
   readonly public: {
     readonly User: {
       readonly createdAt: TimestampString<3>;
-      readonly deletedAt: TimestampString<3> | null;
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
+      readonly passwordResetExpires: TimestampString<3> | null;
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
-      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -287,15 +286,15 @@ export type StorageColumnInputTypes = {
   readonly public: {
     readonly User: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
-      readonly deletedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
+      readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
-      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -303,15 +302,15 @@ export type StorageColumnInputTypes = {
 export namespace Models {
   export type public_User = {
     createdAt: TimestampString<3>;
-    deletedAt: TimestampString<3> | null;
     email: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     isActive: CodecTypes['pg/bool@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     password: CodecTypes['pg/text@1']['output'];
+    passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
+    passwordResetExpires: TimestampString<3> | null;
     phone: CodecTypes['pg/text@1']['output'];
     role: 'PLAYER' | 'OWNER' | 'ADMIN';
-    updatedAt: TimestampString<3>;
     readonly [RelationKeys]?: never;
   };
 }
@@ -347,13 +346,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamp-string@1';
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
-                  readonly typeParams: { readonly precision: 3 };
-                  readonly many: false;
-                };
-                readonly deletedAt: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-string@1';
-                  readonly nullable: true;
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
@@ -395,6 +387,19 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly passwordResetCode: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly passwordResetExpires: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
                 readonly phone: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -406,13 +411,6 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/enum@1';
                   readonly nullable: false;
                   readonly typeParams: { readonly typeName: 'UserRole' };
-                  readonly many: false;
-                };
-                readonly updatedAt: {
-                  readonly dataType: 'pg/timestamp';
-                  readonly codecId: 'pg/timestamp-string@1';
-                  readonly nullable: false;
-                  readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
               };
@@ -465,14 +463,6 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
-              readonly deletedAt: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-string@1';
-                  readonly typeParams: { readonly precision: 3 };
-                };
-              };
               readonly email: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -493,6 +483,18 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly passwordResetCode: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly passwordResetExpires: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
               readonly phone: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -505,14 +507,6 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly typeName: 'UserRole' };
                 };
               };
-              readonly updatedAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamp-string@1';
-                  readonly typeParams: { readonly precision: 3 };
-                };
-              };
             };
             readonly relations: Record<string, never>;
             readonly storage: {
@@ -520,15 +514,15 @@ type ContractBase = Omit<
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly createdAt: { readonly column: 'createdAt' };
-                readonly deletedAt: { readonly column: 'deletedAt' };
                 readonly email: { readonly column: 'email' };
                 readonly id: { readonly column: 'id' };
                 readonly isActive: { readonly column: 'isActive' };
                 readonly name: { readonly column: 'name' };
                 readonly password: { readonly column: 'password' };
+                readonly passwordResetCode: { readonly column: 'passwordResetCode' };
+                readonly passwordResetExpires: { readonly column: 'passwordResetExpires' };
                 readonly phone: { readonly column: 'phone' };
                 readonly role: { readonly column: 'role' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -564,22 +558,6 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
-  readonly execution: {
-    readonly executionHash: ExecutionHash;
-    readonly mutations: {
-      readonly defaults: readonly [
-        {
-          readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
-          readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
-          readonly ref: {
-            readonly entry: 'User';
-            readonly field: 'updatedAt';
-            readonly namespace: 'public';
-          };
-        },
-      ];
-    };
-  };
   readonly meta: {};
 
   readonly profileHash: ProfileHash;

@@ -1,0 +1,170 @@
+[
+  {
+    "id": "dropColumn.User.deletedAt",
+    "label": "Drop column \"deletedAt\" from \"User\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "deletedAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"deletedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "deletedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"deletedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"deletedAt\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"deletedAt\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "deletedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.User.updatedAt",
+    "label": "Drop column \"updatedAt\" from \"User\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "updatedAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"updatedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"updatedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"updatedAt\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"updatedAt\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.User.passwordResetCode",
+    "label": "Add column \"passwordResetCode\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "passwordResetCode",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"passwordResetCode\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetCode"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"passwordResetCode\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"passwordResetCode\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"passwordResetCode\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetCode"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.User.passwordResetExpires",
+    "label": "Add column \"passwordResetExpires\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "passwordResetExpires",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"passwordResetExpires\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetExpires"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"passwordResetExpires\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"passwordResetExpires\" timestamp(3)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"passwordResetExpires\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetExpires"
+        ]
+      }
+    ]
+  }
+]

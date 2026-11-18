@@ -112,8 +112,9 @@ exports.refresh = async (req, res, next) => {
   );
 };
 
-exports.forgotPassword = (req, res, next) => {
-  const user = User.first({ email: req.body.email });
+exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.first({ email });
 
   if (!user) {
     return next(
@@ -122,11 +123,16 @@ exports.forgotPassword = (req, res, next) => {
   }
 
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const hasedResetCode = crypto
+  const hashedResetCode = crypto
     .createHash("sha256")
     .update(resetCode)
     .digest("hex");
 
-  user.passwordResetCode = hasedResetCode;
-  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  User.update({
+    where: { email },
+    data: {
+      passwordResetCode: hashedResetCode,
+      passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
 };
