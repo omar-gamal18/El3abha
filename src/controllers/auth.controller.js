@@ -1,3 +1,5 @@
+const crypto = require("crypto");
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -77,6 +79,11 @@ exports.login = async (req, res, next) => {
   return sendAuthResponse(res, user, "User logged in successfully", 200);
 };
 
+exports.logout = (req, res) => {
+  res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
+  return res.status(204).send();
+};
+
 exports.refresh = async (req, res, next) => {
   const refreshToken = req.cookies[REFRESH_COOKIE];
   if (!refreshToken) {
@@ -105,7 +112,21 @@ exports.refresh = async (req, res, next) => {
   );
 };
 
-exports.logout = (req, res) => {
-  res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-  return res.status(204).send();
+exports.forgotPassword = (req, res, next) => {
+  const user = User.first({ email: req.body.email });
+
+  if (!user) {
+    return next(
+      new AppError(`There is no user with this email: ${req.body.email}`, 404),
+    );
+  }
+
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hasedResetCode = crypto
+    .createHash("sha256")
+    .update(resetCode)
+    .digest("hex");
+
+  user.passwordResetCode = hasedResetCode;
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 };

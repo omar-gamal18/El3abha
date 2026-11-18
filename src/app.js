@@ -2,8 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
-const notFound = require("./middleware/notFound");
-const errorHandler = require("./middleware/errorHandler");
+const notFound = require("./middleware/notFound.middleware");
+const errorHandler = require("./middleware/errorHandler.middleware");
 const authRoutes = require("./routes/user.route");
 
 const app = express();
