@@ -29,13 +29,13 @@ const refreshCookieOptions = {
 };
 
 const sendAuthResponse = (res, user, message, statusCode) => {
-  res.cookie(REFRESH_COOKIE, signRefreshToken(user.id), refreshCookieOptions);
+  res.cookie(REFRESH_COOKIE, signRefreshToken(user), refreshCookieOptions);
 
   const { password, ...safeUser } = user;
 
   return sendSuccess(
     res,
-    { user: safeUser, token: signAccessToken(user.id) },
+    { user: safeUser, token: signAccessToken(user) },
     message,
     statusCode,
   );
@@ -59,10 +59,18 @@ exports.signup = async (req, res, next) => {
   return sendAuthResponse(res, user, "User created successfully", 201);
 };
 
-exports.login = async (req, res, next) => {
-  const user = await User.first({ email: req.body.email });
+const DUMMY_HASH = bcrypt.hashSync("dummy-password", 12);
 
-  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+exports.login = async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.first({ email });
+
+  const isValid = await bcrypt.compare(
+    password,
+    user ? user.password : DUMMY_HASH,
+  );
+
+  if (!user || !isValid) {
     return next(new AppError("Invalid email or password", 401));
   }
 
@@ -78,7 +86,7 @@ exports.refresh = async (req, res, next) => {
   let payload;
   try {
     payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-  } catch (err) {
+  } catch {
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
     return next(new AppError("Invalid or expired refresh token", 401));
   }
@@ -86,7 +94,7 @@ exports.refresh = async (req, res, next) => {
   const user = await User.first({ id: payload.userId });
   if (!user) {
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-    return next(new AppError("User not found", 404));
+    return next(new AppError("Session is no longer valid", 401));
   }
 
   return sendSuccess(
