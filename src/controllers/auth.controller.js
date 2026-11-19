@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const AppError = require("../utils/AppError");
 const { sendSuccess } = require("../utils/apiResponse");
+const { sendEmail } = require("../utils/sendEmail");
 const db = require("../prismaClient");
 
 const User = db.orm.public.User;
@@ -128,11 +129,20 @@ exports.forgotPassword = async (req, res, next) => {
     .update(resetCode)
     .digest("hex");
 
-  User.update({
-    where: { email },
-    data: {
-      passwordResetCode: hashedResetCode,
-      passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
-    },
+  await User.where({ email }).update({
+    passwordResetCode: hashedResetCode,
+    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
   });
+
+  try {
+    await sendEmail({ to: user.email, resetCode });
+  } catch (err) {
+    await User.where({ email }).update({
+      passwordResetCode: null,
+      passwordResetExpires: null,
+    });
+    return next(new AppError("Error sending the email. Try again later.", 500));
+  }
+
+  return sendSuccess(res, null, "Reset code sent to your email", 200);
 };
