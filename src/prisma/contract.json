@@ -77,6 +77,13 @@
                   }
                 }
               },
+              "passwordResetToken": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "passwordResetVerified": {
                 "nullable": false,
                 "type": {
@@ -128,6 +135,9 @@
                 },
                 "passwordResetExpires": {
                   "column": "passwordResetExpires"
+                },
+                "passwordResetToken": {
+                  "column": "passwordResetToken"
                 },
                 "passwordResetVerified": {
                   "column": "passwordResetVerified"
@@ -223,6 +233,11 @@
                     "precision": 3
                   }
                 },
+                "passwordResetToken": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "passwordResetVerified": {
                   "codecId": "pg/bool@1",
                   "dataType": "pg/bool",
@@ -292,7 +307,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e5d475f890a71229a2abde9f85fc02cfd68456a531dcbafe5108bab9aea0f5c4"
+    "storageHash": "8911088be667b55786cf682330361abd76d33475579a81244207ddf2e0785691"
   },
   "capabilities": {
     "postgres": {

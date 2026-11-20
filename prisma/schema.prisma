@@ -16,6 +16,7 @@ model User {
     isActive              Boolean   @default(true)
     createdAt             DateTime  @default(now())
     passwordResetCode     String?
+    passwordResetToken    String?
     passwordResetExpires  DateTime?
     passwordResetVerified Boolean   @default(false)
 }
