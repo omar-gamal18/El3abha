@@ -185,7 +185,7 @@ exports.verifyPassResetCode = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   const { newPassword } = req.body;
-  const resetToken = req.cookie[RESET_COOKIE];
+  const resetToken = req.cookies[RESET_COOKIE];
 
   if (!resetToken)
     return next(
@@ -200,7 +200,7 @@ exports.resetPassword = async (req, res, next) => {
     .first();
 
   if (!user) {
-    res.clearCookie(RESET_COOKIE, { path: refreshCookieOptions.path });
+    res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
     return next(new AppError("Invalid or expired reset session", 400));
   }
 
