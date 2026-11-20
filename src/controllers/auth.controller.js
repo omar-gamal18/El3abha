@@ -7,6 +7,7 @@ const AppError = require("../utils/AppError");
 const { sendSuccess } = require("../utils/apiResponse");
 const { sendEmail } = require("../utils/sendEmail");
 const db = require("../prismaClient");
+const path = require("path");
 
 const User = db.orm.public.User;
 
@@ -180,4 +181,38 @@ exports.verifyPassResetCode = async (req, res, next) => {
   res.cookie(RESET_COOKIE, resetToken, resetCookieOptions);
 
   return sendSuccess(res, null, "Reset code verified", 200);
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const { newPassword } = req.body;
+  const resetToken = req.cookie[RESET_COOKIE];
+
+  if (!resetToken)
+    return next(
+      new AppError("Reset session expired. Please verify your code again", 400),
+    );
+
+  const user = await User.where((u) =>
+    u.passwordResetToken.eq(createHash(resetToken)),
+  )
+    .where((u) => u.passwordResetExpires.gt(new Date()))
+    .where((u) => u.passwordResetVerified.eq(true))
+    .first();
+
+  if (!user) {
+    res.clearCookie(RESET_COOKIE, { path: refreshCookieOptions.path });
+    return next(new AppError("Invalid or expired reset session", 400));
+  }
+
+  await User.whereUnique({ id: user.id }).update({
+    password: await bcrypt.hash(newPassword, 12),
+    passwordResetCode: null,
+    passwordResetToken: null,
+    passwordResetExpires: null,
+    passwordResetVerified: false,
+  });
+
+  res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
+
+  return sendSuccess(res, null, "Password changed successfully", 200);
 };
