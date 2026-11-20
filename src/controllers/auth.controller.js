@@ -7,7 +7,6 @@ const AppError = require("../utils/AppError");
 const { sendSuccess } = require("../utils/apiResponse");
 const { sendEmail } = require("../utils/sendEmail");
 const db = require("../prismaClient");
-const path = require("path");
 
 const User = db.orm.public.User;
 

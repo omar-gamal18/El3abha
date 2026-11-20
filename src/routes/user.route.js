@@ -4,6 +4,7 @@ const {
   login,
   forgotPassword,
   verifyPassResetCode,
+  resetPassword,
 } = require("../controllers/auth.controller.js");
 
 const { protect } = require("../middleware/auth.middleware.js");
@@ -14,5 +15,6 @@ router.post("/signup", signup);
 router.post("/login", login);
 router.post("/forgotPassword", forgotPassword);
 router.post("/verifyResetCode", verifyPassResetCode);
+router.post("/resetPassword", resetPassword);
 
 module.exports = router;
