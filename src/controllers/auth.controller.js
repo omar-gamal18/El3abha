@@ -148,6 +148,15 @@ exports.forgotPassword = async (req, res, next) => {
   return sendSuccess(res, null, "Reset code sent to your email", 200);
 };
 
+const RESET_COOKIE = "resetToken";
+const resetCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/api/v1/auth",
+  maxAge: 10 * 60 * 1000,
+};
+
 exports.verifyPassResetCode = async (req, res, next) => {
   const { resetCode } = req.body;
   const hashedResetCode = createHash(resetCode.toString());
@@ -159,9 +168,16 @@ exports.verifyPassResetCode = async (req, res, next) => {
   if (!user)
     return next(new AppError("Reset code is invalid or has expired", 400));
 
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
   await User.whereUnique({ id: user.id }).update({
     passwordResetVerified: true,
+    passwordResetCode: null,
+    passwordResetToken: createHash(resetToken),
+    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
   });
+
+  res.cookie(RESET_COOKIE, resetToken, resetCookieOptions);
 
   return sendSuccess(res, null, "Reset code verified", 200);
 };
