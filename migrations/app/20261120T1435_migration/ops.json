@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.User.passwordResetVerified",
+    "label": "Add column \"passwordResetVerified\" to \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "passwordResetVerified",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"passwordResetVerified\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetVerified"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"passwordResetVerified\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"passwordResetVerified\" bool DEFAULT false NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"passwordResetVerified\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "passwordResetVerified"
+        ]
+      }
+    ]
+  }
+]

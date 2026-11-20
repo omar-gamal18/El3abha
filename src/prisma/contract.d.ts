@@ -21,7 +21,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'b01b4120221257b2b2d93b61cf7d12f002690a8d388a55214c0e636eef404c94'>;
+  StorageHashBase<'e5d475f890a71229a2abde9f85fc02cfd68456a531dcbafe5108bab9aea0f5c4'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -245,6 +245,7 @@ export type FieldOutputTypes = {
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
+      readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
     };
@@ -261,6 +262,7 @@ export type FieldInputTypes = {
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
     };
@@ -277,6 +279,7 @@ export type StorageColumnTypes = {
       readonly password: CodecTypes['pg/text@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
+      readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
     };
@@ -293,6 +296,7 @@ export type StorageColumnInputTypes = {
       readonly password: CodecTypes['pg/text@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
       readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
     };
@@ -309,6 +313,7 @@ export namespace Models {
     password: CodecTypes['pg/text@1']['output'];
     passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
     passwordResetExpires: TimestampString<3> | null;
+    passwordResetVerified: CodecTypes['pg/bool@1']['output'];
     phone: CodecTypes['pg/text@1']['output'];
     role: 'PLAYER' | 'OWNER' | 'ADMIN';
     readonly [RelationKeys]?: never;
@@ -398,6 +403,16 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamp-string@1';
                   readonly nullable: true;
                   readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly passwordResetVerified: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
                   readonly many: false;
                 };
                 readonly phone: {
@@ -495,6 +510,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly passwordResetVerified: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly phone: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -521,6 +540,7 @@ type ContractBase = Omit<
                 readonly password: { readonly column: 'password' };
                 readonly passwordResetCode: { readonly column: 'passwordResetCode' };
                 readonly passwordResetExpires: { readonly column: 'passwordResetExpires' };
+                readonly passwordResetVerified: { readonly column: 'passwordResetVerified' };
                 readonly phone: { readonly column: 'phone' };
                 readonly role: { readonly column: 'role' };
               };

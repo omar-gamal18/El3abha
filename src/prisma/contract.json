@@ -77,6 +77,13 @@
                   }
                 }
               },
+              "passwordResetVerified": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "phone": {
                 "nullable": false,
                 "type": {
@@ -121,6 +128,9 @@
                 },
                 "passwordResetExpires": {
                   "column": "passwordResetExpires"
+                },
+                "passwordResetVerified": {
+                  "column": "passwordResetVerified"
                 },
                 "phone": {
                   "column": "phone"
@@ -213,6 +223,15 @@
                     "precision": 3
                   }
                 },
+                "passwordResetVerified": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "phone": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -273,7 +292,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b01b4120221257b2b2d93b61cf7d12f002690a8d388a55214c0e636eef404c94"
+    "storageHash": "e5d475f890a71229a2abde9f85fc02cfd68456a531dcbafe5108bab9aea0f5c4"
   },
   "capabilities": {
     "postgres": {

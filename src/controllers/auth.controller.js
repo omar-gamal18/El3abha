@@ -113,6 +113,9 @@ exports.refresh = async (req, res, next) => {
   );
 };
 
+const createHash = (data) =>
+  crypto.createHash("sha256").update(data).digest("hex");
+
 exports.forgotPassword = async (req, res, next) => {
   const { email } = req.body;
   const user = await User.first({ email });
@@ -124,10 +127,7 @@ exports.forgotPassword = async (req, res, next) => {
   }
 
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const hashedResetCode = crypto
-    .createHash("sha256")
-    .update(resetCode)
-    .digest("hex");
+  const hashedResetCode = createHash(resetCode);
 
   await User.where({ email }).update({
     passwordResetCode: hashedResetCode,
@@ -140,9 +140,28 @@ exports.forgotPassword = async (req, res, next) => {
     await User.where({ email }).update({
       passwordResetCode: null,
       passwordResetExpires: null,
+      passwordResetVerified: false,
     });
     return next(new AppError("Error sending the email. Try again later.", 500));
   }
 
   return sendSuccess(res, null, "Reset code sent to your email", 200);
+};
+
+exports.verifyPassResetCode = async (req, res, next) => {
+  const { resetCode } = req.body;
+  const hashedResetCode = createHash(resetCode.toString());
+
+  const user = await User.where((u) => u.passwordResetCode.eq(hashedResetCode))
+    .where((u) => u.passwordResetExpires.gt(new Date()))
+    .first();
+
+  if (!user)
+    return next(new AppError("Reset code is invalid or has expired", 400));
+
+  await User.whereUnique({ id: user.id }).update({
+    passwordResetVerified: true,
+  });
+
+  return sendSuccess(res, null, "Reset code verified", 200);
 };
