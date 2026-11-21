@@ -1,5 +1,4 @@
 const AppError = require("../utils/appError");
-const AuthError = require("../utils/authError");
 const env = require("../config/env");
 const repository = require("../repositories/auth.repository");
 const {
@@ -21,7 +20,7 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    throw new AuthError(
+    throw new AppError(
       "You are not logged in! Please log in to get access.",
       401,
     );
@@ -35,24 +34,24 @@ exports.protect = async (req, res, next) => {
       audience: JWT_AUDIENCE,
     });
   } catch {
-    throw AuthError.invalidToken("Invalid access token");
+    throw new AppError("Invalid access token", 401);
   }
 
   if (!Number.isInteger(decoded.userId)) {
-    throw AuthError.invalidToken("Invalid access token");
+    throw new AppError("Invalid access token", 401);
   }
 
   const currentUser = await repository.findUserById(decoded.userId);
 
   if (!currentUser) {
-    throw new AuthError(
+    throw new AppError(
       "The user belonging to this token no longer exists.",
       401,
     );
   }
 
   if (!currentUser.isActive) {
-    throw new AuthError("Your account is inactive", 401);
+    throw new AppError("Your account is inactive", 401);
   }
 
   if (currentUser.passwordChangedAt) {
@@ -62,7 +61,7 @@ exports.protect = async (req, res, next) => {
     );
 
     if (decoded.iat < changedTimestamp) {
-      throw new AuthError(
+      throw new AppError(
         "User recently changed their password! Please log in again.",
         401,
       );

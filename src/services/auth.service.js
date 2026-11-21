@@ -5,7 +5,6 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const AppError = require('../utils/appError');
-const AuthError = require('../utils/authError');
 const env = require('../config/env');
 const logger = require('../utils/logger');
 const repository = require('../repositories/auth.repository');
@@ -73,31 +72,11 @@ const sendAuthTokens = async (user) => {
 };
 
 /**
- * Creates the common reset-code failure.
- * @returns {AppError} generic reset-code error with HTTP status 400
- * @throws {never}
- */
-const invalidResetCode = () =>
-  new AppError('Invalid or expired reset code', 400);
-
-/**
- * Creates a reset-session error that instructs the controller to clear its cookie.
- * @param {string} message error message
- * @returns {AppError} reset-session error with HTTP status 400
- * @throws {never}
- */
-const invalidResetSession = (message) => {
-  const error = new AppError(message, 400);
-  error.clearResetCookie = true;
-  return error;
-};
-
-/**
  * Applies the refresh-token reuse policy to a previously revoked row.
  * @param {object} record revoked refresh-token row
  * @returns {Promise<never>}
- * @throws {AuthError} 401 if reuse is outside the grace window
- * @throws {AuthError} 409 if the retry is within the grace window
+ * @throws {AppError} 401 if reuse is outside the grace window
+ * @throws {AppError} 409 if the retry is within the grace window
  */
 const handleRevokedToken = async (record) => {
   const isReuse =
@@ -110,18 +89,14 @@ const handleRevokedToken = async (record) => {
       userId: record.userId,
       familyId: record.familyId,
     });
-    throw new AuthError(AuthError.INVALID_TOKEN_MESSAGE, 401, {
-      clearCookie: true,
-    });
+    throw AppError.invalidToken();
   }
 
   logger.warn('Refresh token retry within grace window', {
     userId: record.userId,
     familyId: record.familyId,
   });
-  throw new AuthError(AuthError.INVALID_TOKEN_MESSAGE, 409, {
-    clearCookie: false,
-  });
+  throw AppError.refreshRetry();
 };
 
 /**
@@ -194,19 +169,19 @@ exports.logout = async (refreshToken) => {
  * Rotates a refresh token within its existing family.
  * @param {string|undefined} refreshToken
  * @returns {Promise<{accessToken: string, refreshToken: string}>}
- * @throws {AuthError} 401 invalid token or detected reuse
- * @throws {AuthError} 409 retry during the grace window
+ * @throws {AppError} 401 invalid token or detected reuse
+ * @throws {AppError} 409 retry during the grace window
  */
 exports.rotateRefreshToken = async (refreshToken) => {
   if (!refreshToken) {
-    throw new AuthError('Refresh token not found', 401);
+    throw AppError.refreshTokenMissing();
   }
 
   let payload;
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    throw AuthError.invalidToken('Invalid or expired refresh token');
+    throw AppError.refreshTokenInvalid();
   }
 
   if (
@@ -215,14 +190,14 @@ exports.rotateRefreshToken = async (refreshToken) => {
     typeof payload.jti !== 'string' ||
     payload.jti.length === 0
   ) {
-    throw AuthError.invalidToken('Invalid or expired refresh token');
+    throw AppError.refreshTokenInvalid();
   }
 
   const tokenRecord = await repository.findRefreshTokenByHash(
     hashToken(refreshToken),
   );
   if (!tokenRecord || tokenRecord.userId !== payload.userId) {
-    throw AuthError.invalidToken('Session is no longer valid');
+    throw AppError.invalidToken();
   }
 
   if (tokenRecord.revokedAt) {
@@ -231,12 +206,12 @@ exports.rotateRefreshToken = async (refreshToken) => {
 
   const now = new Date();
   if (tokenRecord.expiresAt <= now) {
-    throw AuthError.invalidToken('Session is no longer valid');
+    throw AppError.invalidToken();
   }
 
   const user = await repository.findUserById(payload.userId);
   if (!user || !user.isActive) {
-    throw AuthError.invalidToken('Session is no longer valid');
+    throw AppError.invalidToken();
   }
 
   const nextRefreshToken = signRefreshToken(user);
@@ -255,7 +230,7 @@ exports.rotateRefreshToken = async (refreshToken) => {
     if (latestRecord?.revokedAt) {
       await handleRevokedToken(latestRecord);
     }
-    throw AuthError.invalidToken('Session is no longer valid');
+    throw AppError.invalidToken();
   }
 
   return {
@@ -344,7 +319,7 @@ exports.verifyPasswordResetCode = async ({ email, resetCode }) => {
   }
 
   if (!hasActiveCode || attempts >= PASSWORD_RESET_MAX_ATTEMPTS || !isCorrect) {
-    throw invalidResetCode();
+    throw AppError.invalidResetCode();
   }
 
   const resetToken = createRandomToken();
@@ -358,7 +333,7 @@ exports.verifyPasswordResetCode = async ({ email, resetCode }) => {
     maxAttempts: PASSWORD_RESET_MAX_ATTEMPTS,
   });
 
-  if (!consumed) throw invalidResetCode();
+  if (!consumed) throw AppError.invalidResetCode();
   return resetToken;
 };
 
@@ -371,10 +346,7 @@ exports.verifyPasswordResetCode = async ({ email, resetCode }) => {
  */
 exports.resetPassword = async (newPassword, resetToken) => {
   if (!resetToken) {
-    throw new AppError(
-      'Reset session expired. Please verify your code again',
-      400,
-    );
+    throw AppError.resetTokenMissing();
   }
 
   const now = new Date();
@@ -382,7 +354,7 @@ exports.resetPassword = async (newPassword, resetToken) => {
   const user = await repository.findUserWithResetToken(resetTokenHash, now);
 
   if (!user) {
-    throw invalidResetSession('Invalid or expired reset session');
+    throw AppError.invalidResetToken();
   }
 
   const password = await bcrypt.hash(newPassword, PASSWORD_HASH_ROUNDS);
@@ -394,6 +366,6 @@ exports.resetPassword = async (newPassword, resetToken) => {
   });
 
   if (!updated) {
-    throw invalidResetSession('Invalid or expired reset session');
+    throw AppError.invalidResetToken();
   }
 };

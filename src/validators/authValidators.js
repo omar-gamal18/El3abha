@@ -104,13 +104,13 @@ exports.validateForgotPassword = validate([normalizedEmail()]);
  * @throws {AppError} 400 with the generic reset-code message for invalid input
  */
 exports.validateVerifyResetCode = validate([
-  normalizedEmail('Invalid or expired reset code'),
+  normalizedEmail(AppError.MESSAGES.RESET_CODE_INVALID),
   body('resetCode')
     .custom((value) =>
       (typeof value === 'string' || typeof value === 'number') &&
       new RegExp(`^\\d{${PASSWORD_RESET_CODE_LENGTH}}$`).test(String(value)),
     )
-    .withMessage('Invalid or expired reset code')
+    .withMessage(AppError.MESSAGES.RESET_CODE_INVALID)
     .customSanitizer((value) => String(value)),
 ]);
 

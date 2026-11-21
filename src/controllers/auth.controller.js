@@ -1,5 +1,5 @@
 const authService = require('../services/auth.service');
-const AuthError = require('../utils/authError');
+const AppError = require('../utils/appError');
 const cookies = require('../utils/authCookies');
 const { sendSuccess } = require('../utils/apiResponse');
 const {
@@ -87,8 +87,8 @@ exports.logout = async (req, res) => {
  * @param {import('express').Response} res Express response
  * @returns {import('express').Response} 200 success response
  * @returns 200 Token refreshed successfully
- * @throws {AuthError} 401 invalid, expired, inactive, or reused token
- * @throws {AuthError} 409 retry during the grace window
+ * @throws {AppError} 401 invalid, expired, inactive, or reused token
+ * @throws {AppError} 409 retry during the grace window
  * @throws {Error} 500 persistence error
  */
 exports.refresh = async (req, res) => {
@@ -105,7 +105,7 @@ exports.refresh = async (req, res) => {
       200,
     );
   } catch (error) {
-    if (error instanceof AuthError && error.clearCookie) {
+    if (error instanceof AppError && error.clearRefreshCookie) {
       cookies.clearRefreshCookie(res);
     }
     throw error;
@@ -144,7 +144,7 @@ exports.forgotPassword = async (req, res) => {
  * @param {import('express').Response} res Express response
  * @returns {import('express').Response} 200 success response
  * @returns 200 Reset code verified
- * @throws {AppError} 400 Invalid or expired reset code
+ * @throws {AppError} 400 reset-code verification failed
  * @throws {Error} 500 database error
  */
 exports.verifyPassResetCode = async (req, res) => {
@@ -172,7 +172,9 @@ exports.resetPassword = async (req, res) => {
       req.cookies?.[RESET_COOKIE_NAME],
     );
   } catch (error) {
-    if (error.clearResetCookie) cookies.clearResetCookie(res);
+    if (error instanceof AppError && error.clearResetCookie) {
+      cookies.clearResetCookie(res);
+    }
     throw error;
   }
   cookies.clearResetCookie(res);
