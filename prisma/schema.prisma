@@ -19,9 +19,24 @@ model User {
     passwordResetToken    String?
     passwordResetExpires  DateTime?
     passwordResetVerified Boolean   @default(false)
+    refreshTokens         RefreshToken[]
 
     @@index([passwordResetCode])
     @@index([passwordResetToken])
+}
+
+model RefreshToken {
+    id        Int       @id @default(autoincrement())
+    userId    Int
+    familyId  String?
+    tokenHash String    @unique
+    expiresAt DateTime
+    revokedAt DateTime?
+    createdAt DateTime  @default(now())
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([familyId])
 }
 
 enum UserRole {

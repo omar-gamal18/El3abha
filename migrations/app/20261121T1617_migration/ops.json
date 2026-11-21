@@ -1,0 +1,161 @@
+[
+  {
+    "id": "table.RefreshToken",
+    "label": "Create table \"RefreshToken\"",
+    "summary": "Creates table \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"RefreshToken\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"RefreshToken\"",
+        "sql": "CREATE TABLE \"public\".\"RefreshToken\" (\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"expiresAt\" timestamp(3) NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"revokedAt\" timestamp(3),\n  \"tokenHash\" text NOT NULL,\n  \"userId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"RefreshToken\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RefreshToken.RefreshToken_tokenHash_key",
+    "label": "Create index \"RefreshToken_tokenHash_key\" on \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RefreshToken_tokenHash_key",
+        "table": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RefreshToken_tokenHash_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_tokenHash_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RefreshToken_tokenHash_key\"",
+        "sql": "CREATE UNIQUE INDEX \"RefreshToken_tokenHash_key\" ON \"public\".\"RefreshToken\" (\"tokenHash\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RefreshToken_tokenHash_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_tokenHash_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RefreshToken.RefreshToken_userId_idx",
+    "label": "Create index \"RefreshToken_userId_idx\" on \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RefreshToken_userId_idx",
+        "table": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RefreshToken_userId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_userId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RefreshToken_userId_idx\"",
+        "sql": "CREATE INDEX \"RefreshToken_userId_idx\" ON \"public\".\"RefreshToken\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RefreshToken_userId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_userId_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.RefreshToken.RefreshToken_userId_fkey",
+    "label": "Add foreign key \"RefreshToken_userId_fkey\" on \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "RefreshToken_userId_fkey",
+        "table": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"RefreshToken_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RefreshToken_userId_fkey",
+          "public",
+          "\"public\".\"RefreshToken\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"RefreshToken_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"RefreshToken\"\nADD CONSTRAINT \"RefreshToken_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"RefreshToken_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RefreshToken_userId_fkey",
+          "public",
+          "\"public\".\"RefreshToken\""
+        ]
+      }
+    ]
+  }
+]

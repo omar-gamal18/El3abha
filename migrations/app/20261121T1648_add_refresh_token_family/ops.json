@@ -1,0 +1,83 @@
+[
+  {
+    "id": "column.public.RefreshToken.familyId",
+    "label": "Add column \"familyId\" to \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "familyId",
+        "table": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"familyId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RefreshToken",
+          "familyId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"familyId\"",
+        "sql": "ALTER TABLE \"public\".\"RefreshToken\" ADD COLUMN \"familyId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"familyId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "RefreshToken",
+          "familyId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RefreshToken.RefreshToken_familyId_idx",
+    "label": "Create index \"RefreshToken_familyId_idx\" on \"RefreshToken\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RefreshToken_familyId_idx",
+        "table": "RefreshToken"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RefreshToken_familyId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_familyId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RefreshToken_familyId_idx\"",
+        "sql": "CREATE INDEX \"RefreshToken_familyId_idx\" ON \"public\".\"RefreshToken\" (\"familyId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RefreshToken_familyId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RefreshToken_familyId_idx\""
+        ]
+      }
+    ]
+  }
+]

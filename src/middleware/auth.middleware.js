@@ -1,5 +1,5 @@
 const db = require("../prismaClient");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 
 const jwt = require("jsonwebtoken");
 
@@ -29,6 +29,10 @@ exports.protect = async (req, res, next) => {
     return next(
       new AppError("The user belonging to this token no longer exists.", 401),
     );
+  }
+
+  if (!currentUser.isActive) {
+    return next(new AppError("Your account is inactive", 401));
   }
 
   if (currentUser.passwordChangedAt) {
