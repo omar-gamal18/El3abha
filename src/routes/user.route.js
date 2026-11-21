@@ -1,4 +1,5 @@
 const { Router } = require("express");
+
 const {
   signup,
   login,
@@ -9,16 +10,24 @@ const {
   refresh,
 } = require("../controllers/auth.controller.js");
 
+const {
+  registerValidator,
+  loginValidator,
+  forgotPasswordValidator,
+  verifyResetCodeValidator,
+  resetPasswordValidator,
+} = require("../validators/auth.validator");
+
 const { protect } = require("../middleware/auth.middleware.js");
 
 const router = Router();
 
-router.post("/signup", signup);
-router.post("/login", login);
+router.post("/signup", registerValidator, signup);
+router.post("/login", loginValidator, login);
 
-router.post("/forgotPassword", forgotPassword);
-router.post("/verifyResetCode", verifyPassResetCode);
-router.post("/resetPassword", resetPassword);
+router.post("/forgotPassword", forgotPasswordValidator, forgotPassword);
+router.post("/verifyResetCode", verifyResetCodeValidator, verifyPassResetCode);
+router.post("/resetPassword", resetPasswordValidator, resetPassword);
 
 router.post("/refresh", refresh);
 router.post("/logout", protect, logout);
