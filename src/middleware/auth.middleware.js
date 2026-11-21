@@ -1,12 +1,14 @@
-const db = require("../prismaClient");
 const AppError = require("../utils/appError");
+const AuthError = require("../utils/authError");
 const env = require("../config/env");
+const repository = require("../repositories/auth.repository");
+const {
+  JWT_ALGORITHMS,
+  JWT_AUDIENCE,
+  JWT_ISSUER,
+} = require("../config/authConstants");
 
 const jwt = require("jsonwebtoken");
-
-const User = db.orm.public.User;
-const JWT_ISSUER = "el3abha-api";
-const JWT_AUDIENCE = "el3abha-client";
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -19,31 +21,38 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return next(
-      new AppError("You are not logged in! Please log in to get access.", 401),
+    throw new AuthError(
+      "You are not logged in! Please log in to get access.",
+      401,
     );
   }
 
-  const decoded = jwt.verify(token, env.accessSecret, {
-    algorithms: ["HS256"],
-    issuer: JWT_ISSUER,
-    audience: JWT_AUDIENCE,
-  });
-
-  if (!Number.isInteger(decoded.userId)) {
-    return next(new AppError("Invalid access token", 401));
+  let decoded;
+  try {
+    decoded = jwt.verify(token, env.accessSecret, {
+      algorithms: JWT_ALGORITHMS,
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
+  } catch {
+    throw AuthError.invalidToken("Invalid access token");
   }
 
-  const currentUser = await User.first({ id: decoded.userId });
+  if (!Number.isInteger(decoded.userId)) {
+    throw AuthError.invalidToken("Invalid access token");
+  }
+
+  const currentUser = await repository.findUserById(decoded.userId);
 
   if (!currentUser) {
-    return next(
-      new AppError("The user belonging to this token no longer exists.", 401),
+    throw new AuthError(
+      "The user belonging to this token no longer exists.",
+      401,
     );
   }
 
   if (!currentUser.isActive) {
-    return next(new AppError("Your account is inactive", 401));
+    throw new AuthError("Your account is inactive", 401);
   }
 
   if (currentUser.passwordChangedAt) {
@@ -53,11 +62,9 @@ exports.protect = async (req, res, next) => {
     );
 
     if (decoded.iat < changedTimestamp) {
-      return next(
-        new AppError(
-          "User recently changed their password! Please log in again.",
-          401,
-        ),
+      throw new AuthError(
+        "User recently changed their password! Please log in again.",
+        401,
       );
     }
   }
@@ -71,9 +78,7 @@ exports.allowedTo =
   (...roles) =>
   (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(
-        new AppError("You do not have permission to perform this action", 403),
-      );
+      throw new AppError("You do not have permission to perform this action", 403);
     }
     next();
   };

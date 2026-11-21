@@ -1,4 +1,16 @@
-const { rateLimit } = require('express-rate-limit');
+const { ipKeyGenerator, rateLimit } = require('express-rate-limit');
+const {
+  FORGOT_PASSWORD_RATE_LIMIT,
+  FORGOT_PASSWORD_RATE_WINDOW_MS,
+  LOGIN_RATE_WINDOW_MS,
+  LOGIN_RATE_LIMIT,
+  REFRESH_RATE_LIMIT,
+  REFRESH_RATE_WINDOW_MS,
+  RESET_PASSWORD_RATE_LIMIT,
+  RESET_PASSWORD_RATE_WINDOW_MS,
+  VERIFY_RESET_CODE_RATE_LIMIT,
+  VERIFY_RESET_CODE_RATE_WINDOW_MS,
+} = require('../config/authConstants');
 
 const createLimiter = (windowMs, limit, message) =>
   rateLimit({
@@ -12,21 +24,22 @@ const createLimiter = (windowMs, limit, message) =>
     },
   });
 
+const emailKey = (req) => String(req.body?.email ?? '').trim().toLowerCase();
+
 exports.loginLimiter = createLimiter(
-  15 * 60 * 1000,
-  10,
+  LOGIN_RATE_WINDOW_MS,
+  LOGIN_RATE_LIMIT,
   'Too many login attempts. Please try again later.',
 );
 exports.forgotPasswordLimiter = createLimiter(
-  60 * 60 * 1000,
-  3,
+  FORGOT_PASSWORD_RATE_WINDOW_MS,
+  FORGOT_PASSWORD_RATE_LIMIT,
   'Too many password reset requests. Please try again later.',
 );
 exports.forgotPasswordEmailLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 3,
-  keyGenerator: (req) =>
-    `email:${String(req.body.email ?? '').trim().toLowerCase()}`,
+  windowMs: FORGOT_PASSWORD_RATE_WINDOW_MS,
+  limit: FORGOT_PASSWORD_RATE_LIMIT,
+  keyGenerator: (req) => `email:${emailKey(req)}`,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: {
@@ -37,10 +50,10 @@ exports.forgotPasswordEmailLimiter = rateLimit({
   },
 });
 exports.loginEmailLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
+  windowMs: LOGIN_RATE_WINDOW_MS,
+  limit: LOGIN_RATE_LIMIT,
   keyGenerator: (req) =>
-    `email:${String(req.body.email ?? '').trim().toLowerCase()}`,
+    `login:${emailKey(req)}:${ipKeyGenerator(req.ip)}`,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: {
@@ -49,17 +62,17 @@ exports.loginEmailLimiter = rateLimit({
   },
 });
 exports.verifyResetCodeLimiter = createLimiter(
-  15 * 60 * 1000,
-  10,
+  VERIFY_RESET_CODE_RATE_WINDOW_MS,
+  VERIFY_RESET_CODE_RATE_LIMIT,
   'Too many reset-code attempts. Please try again later.',
 );
 exports.refreshLimiter = createLimiter(
-  15 * 60 * 1000,
-  30,
+  REFRESH_RATE_WINDOW_MS,
+  REFRESH_RATE_LIMIT,
   'Too many refresh requests. Please try again later.',
 );
 exports.resetPasswordLimiter = createLimiter(
-  15 * 60 * 1000,
-  5,
+  RESET_PASSWORD_RATE_WINDOW_MS,
+  RESET_PASSWORD_RATE_LIMIT,
   'Too many password reset attempts. Please try again later.',
 );

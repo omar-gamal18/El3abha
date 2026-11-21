@@ -9,7 +9,6 @@ const {
   logout,
 } = require('../controllers/auth.controller.js');
 
-const { protect } = require('../middleware/auth.middleware.js');
 const {
   forgotPasswordLimiter,
   forgotPasswordEmailLimiter,
@@ -25,17 +24,17 @@ const {
   validateResetPassword,
   validateSignup,
   validateVerifyResetCode,
-} = require('../utils/validators/authValidators.js');
+} = require('../validators/authValidators.js');
 
 const router = Router();
 
 router.post('/signup', validateSignup, signup);
-router.post('/login', loginLimiter, validateLogin, loginEmailLimiter, login);
+router.post('/login', loginLimiter, loginEmailLimiter, validateLogin, login);
 router.post(
   '/forgotPassword',
   forgotPasswordLimiter,
-  validateForgotPassword,
   forgotPasswordEmailLimiter,
+  validateForgotPassword,
   forgotPassword,
 );
 router.post(
