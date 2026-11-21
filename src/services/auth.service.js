@@ -1,3 +1,7 @@
+/**
+ * Owns authentication and password-reset business rules.
+ * It must never read Express request/response objects or set cookies.
+ */
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const AppError = require('../utils/appError');
@@ -30,6 +34,12 @@ const { sendEmail } = require('../utils/sendEmail');
 
 const DUMMY_HASH = bcrypt.hashSync(DUMMY_PASSWORD, PASSWORD_HASH_ROUNDS);
 
+/**
+ * Builds the public allowlisted user shape.
+ * @param {object} user database user row
+ * @returns {object} public user fields
+ * @throws {TypeError} if user is null or undefined; no HTTP status is assigned
+ */
 const publicUser = (user) => ({
   id: user.id,
   name: user.name,
@@ -38,6 +48,12 @@ const publicUser = (user) => ({
   role: user.role,
 });
 
+/**
+ * Creates a new refresh-token family and returns the credentials for the response.
+ * @param {object} user database user row
+ * @returns {Promise<{user: object, accessToken: string, refreshToken: string}>}
+ * @throws {Error} if token creation or the database insert fails; no HTTP status is assigned
+ */
 const sendAuthTokens = async (user) => {
   const refreshToken = signRefreshToken(user);
   const familyId = crypto.randomUUID();
@@ -56,15 +72,33 @@ const sendAuthTokens = async (user) => {
   };
 };
 
+/**
+ * Creates the common reset-code failure.
+ * @returns {AppError} generic reset-code error with HTTP status 400
+ * @throws {never}
+ */
 const invalidResetCode = () =>
   new AppError('Invalid or expired reset code', 400);
 
+/**
+ * Creates a reset-session error that instructs the controller to clear its cookie.
+ * @param {string} message error message
+ * @returns {AppError} reset-session error with HTTP status 400
+ * @throws {never}
+ */
 const invalidResetSession = (message) => {
   const error = new AppError(message, 400);
   error.clearResetCookie = true;
   return error;
 };
 
+/**
+ * Applies the refresh-token reuse policy to a previously revoked row.
+ * @param {object} record revoked refresh-token row
+ * @returns {Promise<never>}
+ * @throws {AuthError} 401 if reuse is outside the grace window
+ * @throws {AuthError} 409 if the retry is within the grace window
+ */
 const handleRevokedToken = async (record) => {
   const isReuse =
     Date.now() - new Date(record.revokedAt).getTime() >=

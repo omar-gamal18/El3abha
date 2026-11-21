@@ -1,3 +1,11 @@
+/**
+ * Builds the standard success response object.
+ * @param {*} data response data
+ * @param {string} message success message
+ * @param {*} meta optional metadata
+ * @returns {{success: boolean, message: string, data: *, meta?: *}} response object
+ * @throws {never}
+ */
 const successResponse = (data, message = "Success", meta) => {
   const response = {
     success: true,
@@ -12,6 +20,16 @@ const successResponse = (data, message = "Success", meta) => {
   return response;
 };
 
+/**
+ * Sends the standard success response with the selected HTTP status.
+ * @param {import('express').Response} res Express response
+ * @param {*} data response data
+ * @param {string} message success message
+ * @param {number} statusCode HTTP status
+ * @param {*} meta optional metadata
+ * @returns {import('express').Response} Express response
+ * @throws {Error} if response serialization fails; no HTTP status is assigned
+ */
 const sendSuccess = (
   res,
   data,
