@@ -25,7 +25,7 @@ model User {
 }
 
 enum UserRole {
-    PLAYER
-    OWNER
-    ADMIN
+    player
+    owner
+    admin
 }

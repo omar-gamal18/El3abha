@@ -165,9 +165,9 @@
             "UserRole": {
               "kind": "postgres-enum",
               "members": [
-                "PLAYER",
-                "OWNER",
-                "ADMIN"
+                "player",
+                "owner",
+                "admin"
               ],
               "typeName": "UserRole"
             }
@@ -303,9 +303,9 @@
             "UserRole": {
               "kind": "valueSet",
               "values": [
-                "PLAYER",
-                "OWNER",
-                "ADMIN"
+                "player",
+                "owner",
+                "admin"
               ]
             }
           }
@@ -314,7 +314,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "575b7432418abcf5c26834af939d27f43ace96abc315b85a53b7de8266635e6d"
+    "storageHash": "bb6030eca87beb2c0fd6de924503affbbaf9701256feb39bfb6e883825a69e6c"
   },
   "capabilities": {
     "postgres": {

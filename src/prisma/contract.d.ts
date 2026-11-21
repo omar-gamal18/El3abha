@@ -21,7 +21,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'575b7432418abcf5c26834af939d27f43ace96abc315b85a53b7de8266635e6d'>;
+  StorageHashBase<'bb6030eca87beb2c0fd6de924503affbbaf9701256feb39bfb6e883825a69e6c'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -248,7 +248,7 @@ export type FieldOutputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
-      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly role: 'player' | 'owner' | 'admin';
     };
   };
 };
@@ -266,7 +266,7 @@ export type FieldInputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
-      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly role: 'player' | 'owner' | 'admin';
     };
   };
 };
@@ -284,7 +284,7 @@ export type StorageColumnTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
-      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly role: 'player' | 'owner' | 'admin';
     };
   };
 };
@@ -302,7 +302,7 @@ export type StorageColumnInputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
-      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+      readonly role: 'player' | 'owner' | 'admin';
     };
   };
 };
@@ -320,7 +320,7 @@ export namespace Models {
     passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
     passwordResetVerified: CodecTypes['pg/bool@1']['output'];
     phone: CodecTypes['pg/text@1']['output'];
-    role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    role: 'player' | 'owner' | 'admin';
     readonly [RelationKeys]?: never;
   };
 }
@@ -465,7 +465,7 @@ type ContractBase = Omit<
           readonly valueSet: {
             readonly UserRole: {
               readonly kind: 'valueSet';
-              readonly values: readonly ['PLAYER', 'OWNER', 'ADMIN'];
+              readonly values: readonly ['player', 'owner', 'admin'];
             };
           };
         };
