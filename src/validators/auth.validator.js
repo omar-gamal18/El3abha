@@ -54,7 +54,7 @@ exports.forgotPasswordValidator = [email, validate];
 
 exports.verifyResetCodeValidator = [
   email,
-  body("code")
+  body("resetCode")
     .trim()
     .matches(/^\d{6}$/)
     .withMessage("Code must be 6 digits"),
