@@ -4,6 +4,8 @@ const AppError = require("../utils/appError");
 const jwt = require("jsonwebtoken");
 
 const User = db.orm.public.User;
+const JWT_ISSUER = "el3abha-api";
+const JWT_AUDIENCE = "el3abha-client";
 
 exports.protect = async (req, res, next) => {
   let token;
@@ -21,7 +23,15 @@ exports.protect = async (req, res, next) => {
     );
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET, {
+    algorithms: ["HS256"],
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
+  });
+
+  if (!Number.isInteger(decoded.userId)) {
+    return next(new AppError("Invalid access token", 401));
+  }
 
   const currentUser = await User.first({ id: decoded.userId });
 

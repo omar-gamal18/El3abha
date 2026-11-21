@@ -12,7 +12,11 @@ const User = db.orm.public.User;
 const RefreshToken = db.orm.public.RefreshToken;
 
 const REFRESH_COOKIE = 'refresh_token';
-const REFRESH_DAYS = +process.env.JWT_REFRESH_EXPIRES_DAYS;
+const ACCESS_MINUTES = Number(process.env.JWT_ACCESS_EXPIRES_MINUTES);
+const REFRESH_DAYS = Number(process.env.JWT_REFRESH_EXPIRES_DAYS);
+const JWT_ISSUER = 'el3abha-api';
+const JWT_AUDIENCE = 'el3abha-client';
+const JWT_ALGORITHMS = ['HS256'];
 
 const createHash = (data) =>
   crypto.createHash('sha256').update(data).digest('hex');
@@ -40,14 +44,22 @@ const revokeRefreshTokenFamily = async (familyId) => {
 
 const signAccessToken = (user) =>
   jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
-    expiresIn: process.env.JWT_ACCESS_EXPIRES_MINUTES,
+    algorithm: 'HS256',
+    expiresIn: `${ACCESS_MINUTES}m`,
+    issuer: JWT_ISSUER,
+    audience: JWT_AUDIENCE,
   });
 
 const signRefreshToken = (user) =>
   jwt.sign(
     { userId: user.id, jti: crypto.randomUUID() },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: `${REFRESH_DAYS}d` },
+    {
+      algorithm: 'HS256',
+      expiresIn: `${REFRESH_DAYS}d`,
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    },
   );
 
 const refreshCookieOptions = {
@@ -70,7 +82,13 @@ const sendAuthResponse = async (res, user, message, statusCode) => {
 
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions);
 
-  const { password, ...safeUser } = user;
+  const safeUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+  };
 
   return sendSuccess(
     res,
@@ -129,9 +147,9 @@ exports.logout = async (req, res) => {
     });
 
     if (tokenRecord && !tokenRecord.revokedAt) {
-      await RefreshToken.whereUnique({ id: tokenRecord.id }).update({
-        revokedAt: new Date(),
-      });
+      await RefreshToken.whereUnique({ id: tokenRecord.id })
+        .where((token) => token.revokedAt.isNull())
+        .update({ revokedAt: new Date() });
     }
   }
 
@@ -147,7 +165,11 @@ exports.refresh = async (req, res, next) => {
 
   let payload;
   try {
-    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+      algorithms: JWT_ALGORITHMS,
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
   } catch {
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
     return next(new AppError('Invalid or expired refresh token', 401));
@@ -269,7 +291,7 @@ exports.forgotPassword = async (req, res, next) => {
     await sendEmail({ to: user.email, resetCode });
   } catch (err) {
     console.error('Failed to send password reset email:', err);
-    await User.where({ email }).update({
+    await User.where({ email, passwordResetCode: hashedResetCode }).update({
       passwordResetCode: null,
       passwordResetToken: null,
       passwordResetExpires: null,
@@ -337,7 +359,6 @@ exports.resetPassword = async (req, res, next) => {
     );
 
   const now = new Date();
-  const password = await bcrypt.hash(newPassword, 12);
   const resetTokenHash = createHash(resetToken);
   const resetUser = await User.where((u) =>
     u.passwordResetToken.eq(resetTokenHash),
@@ -346,42 +367,44 @@ exports.resetPassword = async (req, res, next) => {
     .where((u) => u.passwordResetVerified.eq(true))
     .first();
 
-  const updatedUser = resetUser
-    ? await db.transaction(async (tx) => {
-        const [user] = await tx.query(
-          tx.sql.public.User
-            .update({
-              password,
-              passwordResetCode: null,
-              passwordResetToken: null,
-              passwordResetExpires: null,
-              passwordResetVerified: false,
-            })
-            .where((fields, fns) => fns.eq(fields.id, resetUser.id))
-            .where((fields, fns) =>
-              fns.eq(fields.passwordResetToken, resetTokenHash),
-            )
-            .where((fields, fns) => fns.gt(fields.passwordResetExpires, now))
-            .where((fields, fns) =>
-              fns.eq(fields.passwordResetVerified, true),
-            )
-            .returning('id')
-            .build(),
-        );
+  if (!resetUser) {
+    res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
+    return next(new AppError('Invalid or expired reset session', 400));
+  }
 
-        if (!user) return null;
+  const password = await bcrypt.hash(newPassword, 12);
+  const updatedUser = await db.transaction(async (tx) => {
+    const [user] = await tx.query(
+      tx.sql.public.User
+        .update({
+          password,
+          passwordResetCode: null,
+          passwordResetToken: null,
+          passwordResetExpires: null,
+          passwordResetVerified: false,
+        })
+        .where((fields, fns) => fns.eq(fields.id, resetUser.id))
+        .where((fields, fns) =>
+          fns.eq(fields.passwordResetToken, resetTokenHash),
+        )
+        .where((fields, fns) => fns.gt(fields.passwordResetExpires, now))
+        .where((fields, fns) => fns.eq(fields.passwordResetVerified, true))
+        .returning('id')
+        .build(),
+    );
 
-        await tx.execute(
-          tx.sql.public.RefreshToken
-            .update({ revokedAt: now })
-            .where((fields, fns) => fns.eq(fields.userId, user.id))
-            .where((fields, fns) => fns.eq(fields.revokedAt, null))
-            .build(),
-        );
+    if (!user) return null;
 
-        return user;
-      })
-    : null;
+    await tx.execute(
+      tx.sql.public.RefreshToken
+        .update({ revokedAt: now })
+        .where((fields, fns) => fns.eq(fields.userId, user.id))
+        .where((fields, fns) => fns.eq(fields.revokedAt, null))
+        .build(),
+    );
+
+    return user;
+  });
 
   if (!updatedUser) {
     res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });

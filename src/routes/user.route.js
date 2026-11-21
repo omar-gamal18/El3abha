@@ -12,16 +12,18 @@ const {
 const { protect } = require("../middleware/auth.middleware.js");
 const {
   forgotPasswordLimiter,
+  loginLimiter,
+  resetPasswordLimiter,
   verifyResetCodeLimiter,
 } = require("../middleware/rateLimit.middleware.js");
 
 const router = Router();
 
 router.post("/signup", signup);
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 router.post("/forgotPassword", forgotPasswordLimiter, forgotPassword);
 router.post("/verifyResetCode", verifyResetCodeLimiter, verifyPassResetCode);
-router.post("/resetPassword", resetPassword);
+router.post("/resetPassword", resetPasswordLimiter, resetPassword);
 router.post("/refresh", refresh);
 router.post("/logout", logout);
 
