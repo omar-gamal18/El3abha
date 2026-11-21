@@ -34,6 +34,7 @@ const MAX_RESET_ATTEMPTS = 5;
 const JWT_ISSUER = 'el3abha-api';
 const JWT_AUDIENCE = 'el3abha-client';
 const JWT_ALGORITHMS = ['HS256'];
+const DUMMY_HASH = bcrypt.hashSync('dummy-password', 12);
 
 const createHash = (data) =>
   crypto.createHash('sha256').update(data).digest('hex');
@@ -45,7 +46,8 @@ const hashResetCode = (code) => {
     .digest('hex');
 };
 
-const normalizeEmail = (email) => email.trim().toLowerCase();
+const normalizeEmail = (email) =>
+  typeof email === 'string' ? email.trim().toLowerCase() : '';
 
 const safeHashEqual = (submittedHash, storedHash) => {
   const submitted = Buffer.from(submittedHash, 'hex');
@@ -63,6 +65,27 @@ const revokeRefreshTokenFamily = async (familyId) => {
   await RefreshToken.where({ familyId })
     .where((token) => token.revokedAt.isNull())
     .updateAll({ revokedAt: new Date() });
+};
+
+const handleRevokedToken = async (record, res) => {
+  const isReuse =
+    Date.now() - new Date(record.revokedAt).getTime() >= REUSE_GRACE_MS;
+
+  if (isReuse) {
+    await revokeRefreshTokenFamily(record.familyId);
+    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
+    logger.warn('Refresh token reuse detected', {
+      userId: record.userId,
+      familyId: record.familyId,
+    });
+    return new AppError('Session is no longer valid', 401);
+  }
+
+  logger.warn('Refresh token retry within grace window', {
+    userId: record.userId,
+    familyId: record.familyId,
+  });
+  return new AppError('Session is no longer valid', 409);
 };
 
 const signAccessToken = (user) =>
@@ -139,8 +162,6 @@ exports.signup = async (req, res) => {
 
   return await sendAuthResponse(res, user, 'User created successfully', 201);
 };
-
-const DUMMY_HASH = bcrypt.hashSync('dummy-password', 12);
 
 exports.login = async (req, res, next) => {
   const { password } = req.body;
@@ -220,24 +241,7 @@ exports.refresh = async (req, res, next) => {
   }
 
   if (tokenRecord.revokedAt) {
-    const timeSinceRevocation =
-      Date.now() - new Date(tokenRecord.revokedAt).getTime();
-
-    if (timeSinceRevocation >= REUSE_GRACE_MS) {
-      await revokeRefreshTokenFamily(tokenRecord.familyId);
-      logger.warn('Refresh token reuse detected', {
-        userId: tokenRecord.userId,
-        familyId: tokenRecord.familyId,
-      });
-    } else {
-      logger.warn('Refresh token retry within grace window', {
-        userId: tokenRecord.userId,
-        familyId: tokenRecord.familyId,
-      });
-    }
-
-    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-    return next(new AppError('Session is no longer valid', 401));
+    return next(await handleRevokedToken(tokenRecord, res));
   }
 
   if (tokenRecord.expiresAt <= new Date()) {
@@ -284,21 +288,7 @@ exports.refresh = async (req, res, next) => {
   if (!consumed) {
     const latestRecord = await RefreshToken.first({ id: tokenRecord.id });
     if (latestRecord?.revokedAt) {
-      const timeSinceRevocation =
-        Date.now() - new Date(latestRecord.revokedAt).getTime();
-
-      if (timeSinceRevocation >= REUSE_GRACE_MS) {
-        await revokeRefreshTokenFamily(latestRecord.familyId);
-        logger.warn('Refresh token reuse detected', {
-          userId: tokenRecord.userId,
-          familyId: latestRecord.familyId,
-        });
-      } else {
-        logger.warn('Refresh token retry within grace window', {
-          userId: tokenRecord.userId,
-          familyId: latestRecord.familyId,
-        });
-      }
+      return next(await handleRevokedToken(latestRecord, res));
     }
 
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
@@ -348,7 +338,6 @@ exports.forgotPassword = async (req, res) => {
     } catch (error) {
       logger.error('Password reset email failed', {
         userId: user?.id ?? null,
-        familyId: null,
         error: error.message,
       });
 
@@ -364,7 +353,6 @@ exports.forgotPassword = async (req, res) => {
         } catch (cleanupError) {
           logger.error('Password reset cleanup failed', {
             userId: user.id,
-            familyId: null,
             error: cleanupError.message,
           });
         }
@@ -378,8 +366,7 @@ exports.forgotPassword = async (req, res) => {
 exports.verifyPassResetCode = async (req, res, next) => {
   const email =
     typeof req.body.email === 'string' ? normalizeEmail(req.body.email) : '';
-  const resetCode =
-    typeof req.body.resetCode === 'string' ? req.body.resetCode : '';
+  const resetCode = String(req.body.resetCode ?? '');
   const submittedHash = hashResetCode(resetCode);
   const resetCodeError = new AppError('Invalid or expired reset code', 400);
   const now = new Date();
@@ -519,9 +506,4 @@ exports.resetPassword = async (req, res, next) => {
   res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
 
   return sendSuccess(res, null, 'Password changed successfully', 200);
-};
-
-exports.cleanupExpiredRefreshTokens = async () => {
-  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  return RefreshToken.where((token) => token.expiresAt.lt(cutoff)).deleteAll();
 };
