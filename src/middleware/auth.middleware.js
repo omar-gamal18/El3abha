@@ -1,5 +1,6 @@
 const db = require("../prismaClient");
 const AppError = require("../utils/appError");
+const env = require("../config/env");
 
 const jwt = require("jsonwebtoken");
 
@@ -23,7 +24,7 @@ exports.protect = async (req, res, next) => {
     );
   }
 
-  const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET, {
+  const decoded = jwt.verify(token, env.accessSecret, {
     algorithms: ["HS256"],
     issuer: JWT_ISSUER,
     audience: JWT_AUDIENCE,

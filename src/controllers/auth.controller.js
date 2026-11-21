@@ -7,13 +7,30 @@ const AppError = require('../utils/appError');
 const { sendSuccess } = require('../utils/apiResponse');
 const { sendEmail } = require('../utils/sendEmail');
 const db = require('../prismaClient');
+const env = require('../config/env');
+const logger = require('../utils/logger');
 
 const User = db.orm.public.User;
 const RefreshToken = db.orm.public.RefreshToken;
 
 const REFRESH_COOKIE = 'refresh_token';
-const ACCESS_MINUTES = Number(process.env.JWT_ACCESS_EXPIRES_MINUTES);
-const REFRESH_DAYS = Number(process.env.JWT_REFRESH_EXPIRES_DAYS);
+const RESET_COOKIE = 'resetToken';
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  path: '/api/v1/auth',
+  maxAge: env.refreshExpiresDays * 24 * 60 * 60 * 1000,
+};
+const resetCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  path: '/api/v1/auth',
+  maxAge: 10 * 60 * 1000,
+};
+const REUSE_GRACE_MS = 15000;
+const MAX_RESET_ATTEMPTS = 5;
 const JWT_ISSUER = 'el3abha-api';
 const JWT_AUDIENCE = 'el3abha-client';
 const JWT_ALGORITHMS = ['HS256'];
@@ -22,30 +39,36 @@ const createHash = (data) =>
   crypto.createHash('sha256').update(data).digest('hex');
 
 const hashResetCode = (code) => {
-  if (!process.env.RESET_CODE_SECRET) {
-    throw new Error('RESET_CODE_SECRET is required for password recovery');
-  }
-
   return crypto
-    .createHmac('sha256', process.env.RESET_CODE_SECRET)
+    .createHmac('sha256', env.resetCodeSecret)
     .update(code)
     .digest('hex');
+};
+
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
+const safeHashEqual = (submittedHash, storedHash) => {
+  const submitted = Buffer.from(submittedHash, 'hex');
+  const stored = Buffer.from(storedHash, 'hex');
+
+  return (
+    submitted.length === stored.length &&
+    crypto.timingSafeEqual(submitted, stored)
+  );
 };
 
 const revokeRefreshTokenFamily = async (familyId) => {
   if (!familyId) return;
 
-  await db.transaction(async (tx) => {
-    await tx.orm.public.RefreshToken.where({ familyId })
-      .where((token) => token.revokedAt.isNull())
-      .updateAll({ revokedAt: new Date() });
-  });
+  await RefreshToken.where({ familyId })
+    .where((token) => token.revokedAt.isNull())
+    .updateAll({ revokedAt: new Date() });
 };
 
 const signAccessToken = (user) =>
-  jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
+  jwt.sign({ userId: user.id }, env.accessSecret, {
     algorithm: 'HS256',
-    expiresIn: `${ACCESS_MINUTES}m`,
+    expiresIn: `${env.accessExpiresMinutes}m`,
     issuer: JWT_ISSUER,
     audience: JWT_AUDIENCE,
   });
@@ -53,22 +76,14 @@ const signAccessToken = (user) =>
 const signRefreshToken = (user) =>
   jwt.sign(
     { userId: user.id, jti: crypto.randomUUID() },
-    process.env.JWT_REFRESH_SECRET,
+    env.refreshSecret,
     {
       algorithm: 'HS256',
-      expiresIn: `${REFRESH_DAYS}d`,
+      expiresIn: `${env.refreshExpiresDays}d`,
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
     },
   );
-
-const refreshCookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  path: '/api/v1/auth',
-  maxAge: REFRESH_DAYS * 24 * 60 * 60 * 1000,
-};
 
 const sendAuthResponse = async (res, user, message, statusCode) => {
   const refreshToken = signRefreshToken(user);
@@ -77,7 +92,9 @@ const sendAuthResponse = async (res, user, message, statusCode) => {
     userId: user.id,
     familyId: crypto.randomUUID(),
     tokenHash: createHash(refreshToken),
-    expiresAt: new Date(Date.now() + REFRESH_DAYS * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(
+      Date.now() + env.refreshExpiresDays * 24 * 60 * 60 * 1000,
+    ),
   });
 
   res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions);
@@ -98,20 +115,27 @@ const sendAuthResponse = async (res, user, message, statusCode) => {
   );
 };
 
-exports.signup = async (req, res, next) => {
-  const { name, email, phone, password } = req.body;
+exports.signup = async (req, res) => {
+  const { name, phone, password } = req.body;
+  const email = normalizeEmail(req.body.email);
 
   const hashedPass = await bcrypt.hash(password, 12);
 
-  const user = await User.select('id', 'name', 'email', 'phone', 'role').create(
-    {
+  let user;
+  try {
+    user = await User.select('id', 'name', 'email', 'phone', 'role').create({
       name,
       email,
       phone,
       password: hashedPass,
       role: 'PLAYER',
-    },
-  );
+    });
+  } catch (error) {
+    if (error.code === 'P2002' || error.code === '23505') {
+      throw new AppError('Email or phone number is already in use', 409);
+    }
+    throw error;
+  }
 
   return await sendAuthResponse(res, user, 'User created successfully', 201);
 };
@@ -119,7 +143,8 @@ exports.signup = async (req, res, next) => {
 const DUMMY_HASH = bcrypt.hashSync('dummy-password', 12);
 
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = normalizeEmail(req.body.email);
   const user = await User.first({ email });
 
   const isValid = await bcrypt.compare(
@@ -165,7 +190,7 @@ exports.refresh = async (req, res, next) => {
 
   let payload;
   try {
-    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, {
+    payload = jwt.verify(refreshToken, env.refreshSecret, {
       algorithms: JWT_ALGORITHMS,
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
@@ -179,9 +204,7 @@ exports.refresh = async (req, res, next) => {
     !payload ||
     !Number.isInteger(payload.userId) ||
     typeof payload.jti !== 'string' ||
-    payload.jti.length === 0 ||
-    !Number.isInteger(payload.exp) ||
-    !Number.isInteger(payload.iat)
+    payload.jti.length === 0
   ) {
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
     return next(new AppError('Invalid or expired refresh token', 401));
@@ -197,8 +220,22 @@ exports.refresh = async (req, res, next) => {
   }
 
   if (tokenRecord.revokedAt) {
-    await revokeRefreshTokenFamily(tokenRecord.familyId);
-    console.warn(`Refresh token reuse detected for user ${tokenRecord.userId}`);
+    const timeSinceRevocation =
+      Date.now() - new Date(tokenRecord.revokedAt).getTime();
+
+    if (timeSinceRevocation >= REUSE_GRACE_MS) {
+      await revokeRefreshTokenFamily(tokenRecord.familyId);
+      logger.warn('Refresh token reuse detected', {
+        userId: tokenRecord.userId,
+        familyId: tokenRecord.familyId,
+      });
+    } else {
+      logger.warn('Refresh token retry within grace window', {
+        userId: tokenRecord.userId,
+        familyId: tokenRecord.familyId,
+      });
+    }
+
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
     return next(new AppError('Session is no longer valid', 401));
   }
@@ -217,14 +254,16 @@ exports.refresh = async (req, res, next) => {
   const rotatedRefreshToken = signRefreshToken(user);
   const familyId = tokenRecord.familyId || crypto.randomUUID();
   const now = new Date();
-  const expiresAt = new Date(now.getTime() + REFRESH_DAYS * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(
+    now.getTime() + env.refreshExpiresDays * 24 * 60 * 60 * 1000,
+  );
 
   const consumed = await db.transaction(async (tx) => {
     const [updated] = await tx.query(
       tx.sql.public.RefreshToken
         .update({ revokedAt: now, familyId })
         .where((token, fns) => fns.eq(token.id, tokenRecord.id))
-        .where((token, fns) => fns.eq(token.revokedAt, null))
+        .where((token) => token.revokedAt.isNull())
         .where((token, fns) => fns.gt(token.expiresAt, now))
         .returning('id')
         .build(),
@@ -245,8 +284,21 @@ exports.refresh = async (req, res, next) => {
   if (!consumed) {
     const latestRecord = await RefreshToken.first({ id: tokenRecord.id });
     if (latestRecord?.revokedAt) {
-      await revokeRefreshTokenFamily(latestRecord.familyId);
-      console.warn(`Refresh token reuse detected for user ${tokenRecord.userId}`);
+      const timeSinceRevocation =
+        Date.now() - new Date(latestRecord.revokedAt).getTime();
+
+      if (timeSinceRevocation >= REUSE_GRACE_MS) {
+        await revokeRefreshTokenFamily(latestRecord.familyId);
+        logger.warn('Refresh token reuse detected', {
+          userId: tokenRecord.userId,
+          familyId: latestRecord.familyId,
+        });
+      } else {
+        logger.warn('Refresh token retry within grace window', {
+          userId: tokenRecord.userId,
+          familyId: latestRecord.familyId,
+        });
+      }
     }
 
     res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
@@ -263,85 +315,136 @@ exports.refresh = async (req, res, next) => {
   );
 };
 
-exports.forgotPassword = async (req, res, next) => {
-  const { email } = req.body;
+exports.forgotPassword = async (req, res) => {
+  const email = normalizeEmail(req.body.email);
   res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
-  const user = await User.first({ email });
-
-  if (!user) {
-    return sendSuccess(
-      res,
-      null,
-      'If an account exists, a reset code has been sent.',
-      200,
-    );
-  }
-
-  const resetCode = crypto.randomInt(100000, 1000000).toString();
-  const hashedResetCode = hashResetCode(resetCode);
-
-  await User.where({ email }).update({
-    passwordResetCode: hashedResetCode,
-    passwordResetToken: null,
-    passwordResetVerified: false,
-    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
-  });
-
-  try {
-    await sendEmail({ to: user.email, resetCode });
-  } catch (err) {
-    console.error('Failed to send password reset email:', err);
-    await User.where({ email, passwordResetCode: hashedResetCode }).update({
-      passwordResetCode: null,
-      passwordResetToken: null,
-      passwordResetExpires: null,
-      passwordResetVerified: false,
-    });
-  }
-
-  return sendSuccess(
+  const response = sendSuccess(
     res,
     null,
     'If an account exists, a reset code has been sent.',
     200,
   );
-};
 
-const RESET_COOKIE = 'resetToken';
-const resetCookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  path: '/api/v1/auth',
-  maxAge: 10 * 60 * 1000,
+  void (async () => {
+    let user;
+    let hashedResetCode;
+
+    try {
+      user = await User.first({ email });
+      if (!user) return;
+
+      const resetCode = crypto.randomInt(100000, 1000000).toString();
+      hashedResetCode = hashResetCode(resetCode);
+
+      await User.where({ email }).update({
+        passwordResetCode: hashedResetCode,
+        passwordResetToken: null,
+        passwordResetVerified: false,
+        passwordResetAttempts: 0,
+        passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
+      });
+
+      await sendEmail({ to: user.email, resetCode });
+    } catch (error) {
+      logger.error('Password reset email failed', {
+        userId: user?.id ?? null,
+        familyId: null,
+        error: error.message,
+      });
+
+      if (user && hashedResetCode) {
+        try {
+          await User.where({ email, passwordResetCode: hashedResetCode }).update({
+            passwordResetCode: null,
+            passwordResetToken: null,
+            passwordResetExpires: null,
+            passwordResetVerified: false,
+            passwordResetAttempts: 0,
+          });
+        } catch (cleanupError) {
+          logger.error('Password reset cleanup failed', {
+            userId: user.id,
+            familyId: null,
+            error: cleanupError.message,
+          });
+        }
+      }
+    }
+  })();
+
+  return response;
 };
 
 exports.verifyPassResetCode = async (req, res, next) => {
-  const { resetCode } = req.body;
-  const hashedResetCode = hashResetCode(resetCode.toString());
+  const email =
+    typeof req.body.email === 'string' ? normalizeEmail(req.body.email) : '';
+  const resetCode =
+    typeof req.body.resetCode === 'string' ? req.body.resetCode : '';
+  const submittedHash = hashResetCode(resetCode);
+  const resetCodeError = new AppError('Invalid or expired reset code', 400);
   const now = new Date();
+  const user = email ? await User.first({ email }) : null;
+  const storedHash =
+    typeof user?.passwordResetCode === 'string'
+      ? user.passwordResetCode
+      : '0'.repeat(64);
+  const isCorrect = safeHashEqual(submittedHash, storedHash);
 
-  const user = await User.where((u) => u.passwordResetCode.eq(hashedResetCode))
-    .where((u) => u.passwordResetExpires.gt(now))
-    .first();
+  if (
+    !user ||
+    !user.passwordResetCode ||
+    !user.passwordResetExpires ||
+    new Date(user.passwordResetExpires) <= now ||
+    user.passwordResetAttempts >= MAX_RESET_ATTEMPTS ||
+    !isCorrect
+  ) {
+    if (
+      user?.passwordResetCode &&
+      user.passwordResetExpires &&
+      new Date(user.passwordResetExpires) > now &&
+      user.passwordResetAttempts < MAX_RESET_ATTEMPTS &&
+      !isCorrect
+    ) {
+      await db.transaction(async (tx) => {
+        await tx.query(
+          tx.raw.sql`
+            UPDATE public."User"
+            SET "passwordResetAttempts" = "passwordResetAttempts" + 1
+            WHERE "id" = ${user.id}
+              AND "passwordResetCode" = ${user.passwordResetCode}
+              AND "passwordResetExpires" > ${now}
+              AND "passwordResetAttempts" < ${MAX_RESET_ATTEMPTS}
+          `.affectedCount().build(),
+        );
+      });
+    }
 
-  if (!user)
-    return next(new AppError('Reset code is invalid or has expired', 400));
+    return next(resetCodeError);
+  }
 
   const resetToken = crypto.randomBytes(32).toString('hex');
 
-  const consumed = await User.whereUnique({ id: user.id })
-    .where((u) => u.passwordResetCode.eq(hashedResetCode))
-    .where((u) => u.passwordResetExpires.gt(now))
-    .update({
-      passwordResetVerified: true,
-      passwordResetCode: null,
-      passwordResetToken: createHash(resetToken),
-      passwordResetExpires: new Date(now.getTime() + 10 * 60 * 1000),
-    });
+  const [consumed] = await db.transaction(async (tx) =>
+    tx.query(
+      tx.raw.sql`
+        UPDATE public."User"
+        SET "passwordResetVerified" = TRUE,
+            "passwordResetCode" = NULL,
+            "passwordResetAttempts" = 0,
+            "passwordResetToken" = ${createHash(resetToken)},
+            "passwordResetExpires" = ${new Date(now.getTime() + 10 * 60 * 1000)}
+        WHERE "id" = ${user.id}
+          AND "email" = ${email}
+          AND "passwordResetCode" = ${user.passwordResetCode}
+          AND "passwordResetExpires" > ${now}
+          AND "passwordResetAttempts" < ${MAX_RESET_ATTEMPTS}
+        RETURNING "id"
+      `.returnsRow({ id: 'pg/int4@1' }).build(),
+    ),
+  );
 
   if (!consumed) {
-    return next(new AppError('Reset code is invalid or has expired', 400));
+    return next(resetCodeError);
   }
 
   res.cookie(RESET_COOKIE, resetToken, resetCookieOptions);
@@ -382,6 +485,7 @@ exports.resetPassword = async (req, res, next) => {
           passwordResetToken: null,
           passwordResetExpires: null,
           passwordResetVerified: false,
+          passwordResetAttempts: 0,
         })
         .where((fields, fns) => fns.eq(fields.id, resetUser.id))
         .where((fields, fns) =>
@@ -399,7 +503,7 @@ exports.resetPassword = async (req, res, next) => {
       tx.sql.public.RefreshToken
         .update({ revokedAt: now })
         .where((fields, fns) => fns.eq(fields.userId, user.id))
-        .where((fields, fns) => fns.eq(fields.revokedAt, null))
+        .where((fields) => fields.revokedAt.isNull())
         .build(),
     );
 
@@ -415,4 +519,9 @@ exports.resetPassword = async (req, res, next) => {
   res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
 
   return sendSuccess(res, null, 'Password changed successfully', 200);
+};
+
+exports.cleanupExpiredRefreshTokens = async () => {
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  return RefreshToken.where((token) => token.expiresAt.lt(cutoff)).deleteAll();
 };

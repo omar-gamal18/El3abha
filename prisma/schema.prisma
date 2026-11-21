@@ -19,6 +19,7 @@ model User {
     passwordResetToken    String?
     passwordResetExpires  DateTime?
     passwordResetVerified Boolean   @default(false)
+    passwordResetAttempts Int       @default(0)
     refreshTokens         RefreshToken[]
 
     @@index([passwordResetCode])

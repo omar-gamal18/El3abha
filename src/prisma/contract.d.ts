@@ -21,7 +21,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'069be2fdb7dd34bc4237e36c8039696ac4afab6ee772d4f68ed7c017b30a45a1'>;
+  StorageHashBase<'fb2f785944d4d7656bbcfddc9f58c6c29beb60b1261f8534d1fbc6d4d1f93ace'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -252,6 +252,7 @@ export type FieldOutputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
@@ -279,6 +280,7 @@ export type FieldInputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
@@ -306,6 +308,7 @@ export type StorageColumnTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
@@ -333,6 +336,7 @@ export type StorageColumnInputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
@@ -362,6 +366,7 @@ export namespace Models {
     isActive: CodecTypes['pg/bool@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     password: CodecTypes['pg/text@1']['output'];
+    passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
     passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
     passwordResetExpires: TimestampString<3> | null;
     passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
@@ -531,6 +536,16 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly passwordResetAttempts: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
                   readonly many: false;
                 };
                 readonly passwordResetCode: {
@@ -727,6 +742,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly passwordResetAttempts: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly passwordResetCode: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -783,6 +802,7 @@ type ContractBase = Omit<
                 readonly isActive: { readonly column: 'isActive' };
                 readonly name: { readonly column: 'name' };
                 readonly password: { readonly column: 'password' };
+                readonly passwordResetAttempts: { readonly column: 'passwordResetAttempts' };
                 readonly passwordResetCode: { readonly column: 'passwordResetCode' };
                 readonly passwordResetExpires: { readonly column: 'passwordResetExpires' };
                 readonly passwordResetToken: { readonly column: 'passwordResetToken' };

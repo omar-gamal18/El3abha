@@ -171,6 +171,13 @@
                   "kind": "scalar"
                 }
               },
+              "passwordResetAttempts": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "passwordResetCode": {
                 "nullable": true,
                 "type": {
@@ -256,6 +263,9 @@
                 },
                 "password": {
                   "column": "password"
+                },
+                "passwordResetAttempts": {
+                  "column": "passwordResetAttempts"
                 },
                 "passwordResetCode": {
                   "column": "passwordResetCode"
@@ -455,6 +465,15 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "passwordResetAttempts": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nullable": false
+                },
                 "passwordResetCode": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -556,7 +575,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "069be2fdb7dd34bc4237e36c8039696ac4afab6ee772d4f68ed7c017b30a45a1"
+    "storageHash": "fb2f785944d4d7656bbcfddc9f58c6c29beb60b1261f8534d1fbc6d4d1f93ace"
   },
   "capabilities": {
     "postgres": {
