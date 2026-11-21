@@ -1,0 +1,41 @@
+[
+  {
+    "id": "dropIndex.User.User_phone_key",
+    "label": "Drop index \"User_phone_key\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_phone_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_phone_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_phone_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop index \"User_phone_key\"",
+        "sql": "DROP INDEX \"public\".\"User_phone_key\"",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_phone_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_phone_key\""
+        ]
+      }
+    ]
+  }
+]
