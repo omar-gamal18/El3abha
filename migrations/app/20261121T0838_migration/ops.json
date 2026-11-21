@@ -1,0 +1,80 @@
+[
+  {
+    "id": "index.User.User_passwordResetCode_idx",
+    "label": "Create index \"User_passwordResetCode_idx\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_passwordResetCode_idx",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_passwordResetCode_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_passwordResetCode_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_passwordResetCode_idx\"",
+        "sql": "CREATE INDEX \"User_passwordResetCode_idx\" ON \"public\".\"User\" (\"passwordResetCode\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_passwordResetCode_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_passwordResetCode_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_passwordResetToken_idx",
+    "label": "Create index \"User_passwordResetToken_idx\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_passwordResetToken_idx",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_passwordResetToken_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_passwordResetToken_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_passwordResetToken_idx\"",
+        "sql": "CREATE INDEX \"User_passwordResetToken_idx\" ON \"public\".\"User\" (\"passwordResetToken\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_passwordResetToken_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_passwordResetToken_idx\""
+        ]
+      }
+    ]
+  }
+]

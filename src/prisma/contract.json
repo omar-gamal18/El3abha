@@ -278,6 +278,20 @@
                 },
                 {
                   "columns": [
+                    "passwordResetCode"
+                  ],
+                  "name": "User_passwordResetCode_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "passwordResetToken"
+                  ],
+                  "name": "User_passwordResetToken_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
                     "phone"
                   ],
                   "name": "User_phone_key",
@@ -307,7 +321,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "8911088be667b55786cf682330361abd76d33475579a81244207ddf2e0785691"
+    "storageHash": "87dccb3500674ba7aff7aa200c62428363c214d974351304509d7b0922dc9f1f"
   },
   "capabilities": {
     "postgres": {

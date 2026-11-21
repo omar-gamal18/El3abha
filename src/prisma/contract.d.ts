@@ -21,7 +21,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'8911088be667b55786cf682330361abd76d33475579a81244207ddf2e0785691'>;
+  StorageHashBase<'87dccb3500674ba7aff7aa200c62428363c214d974351304509d7b0922dc9f1f'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -447,6 +447,16 @@ type ContractBase = Omit<
                   readonly name: 'User_email_key';
                   readonly columns: readonly ['email'];
                   readonly unique: true;
+                },
+                {
+                  readonly name: 'User_passwordResetCode_idx';
+                  readonly columns: readonly ['passwordResetCode'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'User_passwordResetToken_idx';
+                  readonly columns: readonly ['passwordResetToken'];
+                  readonly unique: false;
                 },
                 {
                   readonly name: 'User_phone_key';
