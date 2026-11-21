@@ -13,4 +13,17 @@ const forgotPasswordLimiter = rateLimit({
   },
 });
 
-module.exports = { forgotPasswordLimiter };
+const verifyResetCodeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      message: "Too many reset-code attempts. Please try again later.",
+    },
+  },
+});
+
+module.exports = { forgotPasswordLimiter, verifyResetCodeLimiter };
