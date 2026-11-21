@@ -11,7 +11,19 @@ const app = express();
 
 app.use(helmet());
 
-app.use(cors());
+const allowedOrigin = process.env.FRONTEND_URL;
+
+app.use(
+  cors({
+    credentials: true,
+    origin(origin, callback) {
+      if (!origin || (allowedOrigin && origin === allowedOrigin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin is not allowed by CORS"));
+    },
+  }),
+);
 
 app.use(express.json());
 app.use(cookieParser());

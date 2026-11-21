@@ -21,7 +21,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'87dccb3500674ba7aff7aa200c62428363c214d974351304509d7b0922dc9f1f'>;
+  StorageHashBase<'fb2f785944d4d7656bbcfddc9f58c6c29beb60b1261f8534d1fbc6d4d1f93ace'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -236,6 +236,15 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
+    readonly RefreshToken: {
+      readonly createdAt: TimestampString<3>;
+      readonly expiresAt: TimestampString<3>;
+      readonly familyId: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly revokedAt: TimestampString<3> | null;
+      readonly tokenHash: CodecTypes['pg/text@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'];
+    };
     readonly User: {
       readonly createdAt: TimestampString<3>;
       readonly email: CodecTypes['pg/text@1']['output'];
@@ -243,6 +252,7 @@ export type FieldOutputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
@@ -254,6 +264,15 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
+    readonly RefreshToken: {
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly expiresAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly familyId: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly revokedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly tokenHash: CodecTypes['pg/text@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'];
+    };
     readonly User: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
@@ -261,6 +280,7 @@ export type FieldInputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
@@ -272,6 +292,15 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
+    readonly RefreshToken: {
+      readonly createdAt: TimestampString<3>;
+      readonly expiresAt: TimestampString<3>;
+      readonly familyId: CodecTypes['pg/text@1']['output'] | null;
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly revokedAt: TimestampString<3> | null;
+      readonly tokenHash: CodecTypes['pg/text@1']['output'];
+      readonly userId: CodecTypes['pg/int4@1']['output'];
+    };
     readonly User: {
       readonly createdAt: TimestampString<3>;
       readonly email: CodecTypes['pg/text@1']['output'];
@@ -279,6 +308,7 @@ export type StorageColumnTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly password: CodecTypes['pg/text@1']['output'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetExpires: TimestampString<3> | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
@@ -290,6 +320,15 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
+    readonly RefreshToken: {
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly expiresAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly familyId: CodecTypes['pg/text@1']['input'] | null;
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly revokedAt: CodecTypes['pg/timestamp-string@1']['input'] | null;
+      readonly tokenHash: CodecTypes['pg/text@1']['input'];
+      readonly userId: CodecTypes['pg/int4@1']['input'];
+    };
     readonly User: {
       readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
@@ -297,6 +336,7 @@ export type StorageColumnInputTypes = {
       readonly isActive: CodecTypes['pg/bool@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly password: CodecTypes['pg/text@1']['input'];
+      readonly passwordResetAttempts: CodecTypes['pg/int4@1']['input'];
       readonly passwordResetCode: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetExpires: CodecTypes['pg/timestamp-string@1']['input'] | null;
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
@@ -308,6 +348,17 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
+  export type public_RefreshToken = {
+    createdAt: TimestampString<3>;
+    expiresAt: TimestampString<3>;
+    familyId: CodecTypes['pg/text@1']['output'] | null;
+    id: CodecTypes['pg/int4@1']['output'];
+    revokedAt: TimestampString<3> | null;
+    tokenHash: CodecTypes['pg/text@1']['output'];
+    userId: CodecTypes['pg/int4@1']['output'];
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
+  };
   export type public_User = {
     createdAt: TimestampString<3>;
     email: CodecTypes['pg/text@1']['output'];
@@ -315,18 +366,21 @@ export namespace Models {
     isActive: CodecTypes['pg/bool@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     password: CodecTypes['pg/text@1']['output'];
+    passwordResetAttempts: CodecTypes['pg/int4@1']['output'];
     passwordResetCode: CodecTypes['pg/text@1']['output'] | null;
     passwordResetExpires: TimestampString<3> | null;
     passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
     passwordResetVerified: CodecTypes['pg/bool@1']['output'];
     phone: CodecTypes['pg/text@1']['output'];
     role: 'PLAYER' | 'OWNER' | 'ADMIN';
-    readonly [RelationKeys]?: never;
+    refreshTokens: public_RefreshToken[];
+    readonly [RelationKeys]?: 'refreshTokens';
   };
 }
 
 export declare const models: {
   public: {
+    RefreshToken: Models.public_RefreshToken;
     User: Models.public_User;
   };
 };
@@ -349,6 +403,93 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly RefreshToken: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly expiresAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly familyId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly revokedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly tokenHash: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'RefreshToken_familyId_idx';
+                  readonly columns: readonly ['familyId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'RefreshToken_tokenHash_key';
+                  readonly columns: readonly ['tokenHash'];
+                  readonly unique: true;
+                },
+                {
+                  readonly name: 'RefreshToken_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'RefreshToken';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly User: {
               columns: {
                 readonly createdAt: {
@@ -395,6 +536,16 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly passwordResetAttempts: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
                   readonly many: false;
                 };
                 readonly passwordResetCode: {
@@ -483,12 +634,84 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly RefreshToken: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'RefreshToken';
+    };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly RefreshToken: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly expiresAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly familyId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly revokedAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly tokenHash: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'RefreshToken';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly expiresAt: { readonly column: 'expiresAt' };
+                readonly familyId: { readonly column: 'familyId' };
+                readonly id: { readonly column: 'id' };
+                readonly revokedAt: { readonly column: 'revokedAt' };
+                readonly tokenHash: { readonly column: 'tokenHash' };
+                readonly userId: { readonly column: 'userId' };
+              };
+            };
+          };
           readonly User: {
             readonly fields: {
               readonly createdAt: {
@@ -518,6 +741,10 @@ type ContractBase = Omit<
               readonly password: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly passwordResetAttempts: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly passwordResetCode: {
                 readonly nullable: true;
@@ -552,7 +779,19 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly refreshTokens: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RefreshToken';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'User';
               readonly namespaceId: 'public';
@@ -563,6 +802,7 @@ type ContractBase = Omit<
                 readonly isActive: { readonly column: 'isActive' };
                 readonly name: { readonly column: 'name' };
                 readonly password: { readonly column: 'password' };
+                readonly passwordResetAttempts: { readonly column: 'passwordResetAttempts' };
                 readonly passwordResetCode: { readonly column: 'passwordResetCode' };
                 readonly passwordResetExpires: { readonly column: 'passwordResetExpires' };
                 readonly passwordResetToken: { readonly column: 'passwordResetToken' };

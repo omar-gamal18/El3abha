@@ -1,217 +1,183 @@
-const crypto = require("crypto");
+const authService = require('../services/auth.service');
+const AppError = require('../utils/appError');
+const cookies = require('../utils/authCookies');
+const { sendSuccess } = require('../utils/apiResponse');
+const {
+  REFRESH_COOKIE_NAME,
+  RESET_COOKIE_NAME,
+} = require('../config/authConstants');
 
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
-const AppError = require("../utils/AppError");
-const { sendSuccess } = require("../utils/apiResponse");
-const { sendEmail } = require("../utils/sendEmail");
-const db = require("../prismaClient");
-
-const User = db.orm.public.User;
-
-const REFRESH_COOKIE = "refresh_token";
-const REFRESH_DAYS = +process.env.JWT_REFRESH_EXPIRES_DAYS;
-
-const signAccessToken = (user) =>
-  jwt.sign({ userId: user.id }, process.env.JWT_ACCESS_SECRET, {
-    expiresIn: process.env.JWT_ACCESS_EXPIRES_MINUTES,
-  });
-
-const signRefreshToken = (user) =>
-  jwt.sign({ userId: user.id }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: `${REFRESH_DAYS}d`,
-  });
-
-const refreshCookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-  path: "/api/v1/auth",
-  maxAge: REFRESH_DAYS * 24 * 60 * 60 * 1000,
-};
-
-const sendAuthResponse = (res, user, message, statusCode) => {
-  res.cookie(REFRESH_COOKIE, signRefreshToken(user), refreshCookieOptions);
-
-  const { password, ...safeUser } = user;
+/**
+ * @route POST /api/v1/auth/signup
+ * @body {string} name
+ * @body {string} email
+ * @body {string} phone
+ * @body {string} password
+ * @sets refresh_token cookie
+ * @param {import('express').Request} req validated signup request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 201 success response
+ * @returns 201 User created successfully
+ * @throws {AppError} 400 invalid request body
+ * @throws {AppError} 409 email or phone number is already in use
+ * @throws {Error} 500 unexpected persistence or token error
+ */
+exports.signup = async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.signup(
+    req.body,
+  );
+  cookies.setRefreshCookie(res, refreshToken);
 
   return sendSuccess(
     res,
-    { user: safeUser, token: signAccessToken(user) },
-    message,
-    statusCode,
+    { user, token: accessToken },
+    'User created successfully',
+    201,
   );
 };
 
-exports.signup = async (req, res, next) => {
-  const { name, email, phone, password, role } = req.body;
-
-  const hashedPass = await bcrypt.hash(password, 12);
-
-  const user = await User.select("id", "name", "email", "phone", "role").create(
-    {
-      name,
-      email,
-      phone,
-      password: hashedPass,
-      role,
-    },
+/**
+ * @route POST /api/v1/auth/login
+ * @body {string} email
+ * @body {string} password
+ * @sets refresh_token cookie
+ * @param {import('express').Request} req validated login request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 200 success response
+ * @returns 200 User logged in successfully
+ * @throws {AppError} 400 invalid request body
+ * @throws {AppError} 401 invalid credentials or inactive account
+ * @throws {Error} 500 unexpected persistence or token error
+ */
+exports.login = async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.login(
+    req.body,
   );
-
-  return sendAuthResponse(res, user, "User created successfully", 201);
-};
-
-const DUMMY_HASH = bcrypt.hashSync("dummy-password", 12);
-
-exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
-  const user = await User.first({ email });
-
-  const isValid = await bcrypt.compare(
-    password,
-    user ? user.password : DUMMY_HASH,
-  );
-
-  if (!user || !isValid) {
-    return next(new AppError("Invalid email or password", 401));
-  }
-
-  return sendAuthResponse(res, user, "User logged in successfully", 200);
-};
-
-exports.logout = (req, res) => {
-  res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-  return res.status(204).send();
-};
-
-exports.refresh = async (req, res, next) => {
-  const refreshToken = req.cookies[REFRESH_COOKIE];
-  if (!refreshToken) {
-    return next(new AppError("Refresh token not found", 401));
-  }
-
-  let payload;
-  try {
-    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-  } catch {
-    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-    return next(new AppError("Invalid or expired refresh token", 401));
-  }
-
-  const user = await User.first({ id: payload.userId });
-  if (!user) {
-    res.clearCookie(REFRESH_COOKIE, { path: refreshCookieOptions.path });
-    return next(new AppError("Session is no longer valid", 401));
-  }
+  cookies.setRefreshCookie(res, refreshToken);
 
   return sendSuccess(
     res,
-    { token: signAccessToken(user) },
-    " token refreshed successfully",
+    { user, token: accessToken },
+    'User logged in successfully',
     200,
   );
 };
 
-const createHash = (data) =>
-  crypto.createHash("sha256").update(data).digest("hex");
+/**
+ * @route POST /api/v1/auth/logout
+ * @cookie refresh_token
+ * @sets refresh_token cleared
+ * @param {import('express').Request} req logout request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 204 empty response
+ * @returns 204
+ * @throws {Error} 500 persistence error
+ */
+exports.logout = async (req, res) => {
+  await authService.logout(req.cookies?.[REFRESH_COOKIE_NAME]);
+  cookies.clearRefreshCookie(res);
+  return res.status(204).send();
+};
 
-exports.forgotPassword = async (req, res, next) => {
-  const { email } = req.body;
-  const user = await User.first({ email });
-
-  if (!user) {
-    return next(
-      new AppError(`There is no user with this email: ${req.body.email}`, 404),
-    );
-  }
-
-  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const hashedResetCode = createHash(resetCode);
-
-  await User.where({ email }).update({
-    passwordResetCode: hashedResetCode,
-    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
-  });
-
+/**
+ * @route POST /api/v1/auth/refresh
+ * @cookie refresh_token
+ * @sets refresh_token cookie
+ * @param {import('express').Request} req refresh request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 200 success response
+ * @returns 200 Token refreshed successfully
+ * @throws {AppError} 401 invalid, expired, inactive, or reused token
+ * @throws {AppError} 409 retry during the grace window
+ * @throws {Error} 500 persistence error
+ */
+exports.refresh = async (req, res) => {
   try {
-    await sendEmail({ to: user.email, resetCode });
-  } catch (err) {
-    await User.where({ email }).update({
-      passwordResetCode: null,
-      passwordResetExpires: null,
-      passwordResetVerified: false,
-    });
-    return next(new AppError("Error sending the email. Try again later.", 500));
-  }
-
-  return sendSuccess(res, null, "Reset code sent to your email", 200);
-};
-
-const RESET_COOKIE = "resetToken";
-const resetCookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-  path: "/api/v1/auth",
-  maxAge: 10 * 60 * 1000,
-};
-
-exports.verifyPassResetCode = async (req, res, next) => {
-  const { resetCode } = req.body;
-  const hashedResetCode = createHash(resetCode.toString());
-
-  const user = await User.where((u) => u.passwordResetCode.eq(hashedResetCode))
-    .where((u) => u.passwordResetExpires.gt(new Date()))
-    .first();
-
-  if (!user)
-    return next(new AppError("Reset code is invalid or has expired", 400));
-
-  const resetToken = crypto.randomBytes(32).toString("hex");
-
-  await User.whereUnique({ id: user.id }).update({
-    passwordResetVerified: true,
-    passwordResetCode: null,
-    passwordResetToken: createHash(resetToken),
-    passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
-  });
-
-  res.cookie(RESET_COOKIE, resetToken, resetCookieOptions);
-
-  return sendSuccess(res, null, "Reset code verified", 200);
-};
-
-exports.resetPassword = async (req, res, next) => {
-  const { newPassword } = req.body;
-  const resetToken = req.cookies[RESET_COOKIE];
-
-  if (!resetToken)
-    return next(
-      new AppError("Reset session expired. Please verify your code again", 400),
+    const { accessToken, refreshToken } = await authService.rotateRefreshToken(
+      req.cookies?.[REFRESH_COOKIE_NAME],
     );
+    cookies.setRefreshCookie(res, refreshToken);
 
-  const user = await User.where((u) =>
-    u.passwordResetToken.eq(createHash(resetToken)),
-  )
-    .where((u) => u.passwordResetExpires.gt(new Date()))
-    .where((u) => u.passwordResetVerified.eq(true))
-    .first();
-
-  if (!user) {
-    res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
-    return next(new AppError("Invalid or expired reset session", 400));
+    return sendSuccess(
+      res,
+      { token: accessToken },
+      'Token refreshed successfully',
+      200,
+    );
+  } catch (error) {
+    if (error instanceof AppError && error.clearRefreshCookie) {
+      cookies.clearRefreshCookie(res);
+    }
+    throw error;
   }
+};
 
-  await User.whereUnique({ id: user.id }).update({
-    password: await bcrypt.hash(newPassword, 12),
-    passwordResetCode: null,
-    passwordResetToken: null,
-    passwordResetExpires: null,
-    passwordResetVerified: false,
-  });
+/**
+ * @route POST /api/v1/auth/forgotPassword
+ * @body {string} email normalized by the validator
+ * @clears resetToken cookie
+ * @param {import('express').Request} req validated forgot-password request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 200 generic response sent before background work
+ * @throws {AppError} 400 invalid email
+ * @returns 200 If an account exists, a reset code has been sent.
+ */
+exports.forgotPassword = async (req, res) => {
+  cookies.clearResetCookie(res);
+  const response = sendSuccess(
+    res,
+    null,
+    'If an account exists, a reset code has been sent.',
+    200,
+  );
 
-  res.clearCookie(RESET_COOKIE, { path: resetCookieOptions.path });
+  void authService.forgotPassword(req.body.email);
+  return response;
+};
 
-  return sendSuccess(res, null, "Password changed successfully", 200);
+/**
+ * @route POST /api/v1/auth/verifyResetCode
+ * @body {string} email normalized by the validator
+ * @body {string|number} resetCode
+ * @sets resetToken cookie
+ * @param {import('express').Request} req validated verification request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 200 success response
+ * @returns 200 Reset code verified
+ * @throws {AppError} 400 reset-code verification failed
+ * @throws {Error} 500 database error
+ */
+exports.verifyPassResetCode = async (req, res) => {
+  const resetToken = await authService.verifyPasswordResetCode(req.body);
+  cookies.setResetCookie(res, resetToken);
+  return sendSuccess(res, null, 'Reset code verified', 200);
+};
+
+/**
+ * @route POST /api/v1/auth/resetPassword
+ * @body {string} newPassword
+ * @cookie resetToken
+ * @clears resetToken and refresh_token cookies
+ * @param {import('express').Request} req validated reset request
+ * @param {import('express').Response} res Express response
+ * @returns {import('express').Response} 200 success response
+ * @returns 200 Password changed successfully
+ * @throws {AppError} 400 missing, invalid, or expired reset token
+ * @throws {Error} 500 database error
+ */
+exports.resetPassword = async (req, res) => {
+  try {
+    await authService.resetPassword(
+      req.body.newPassword,
+      req.cookies?.[RESET_COOKIE_NAME],
+    );
+  } catch (error) {
+    if (error instanceof AppError && error.clearResetCookie) {
+      cookies.clearResetCookie(res);
+    }
+    throw error;
+  }
+  cookies.clearResetCookie(res);
+  cookies.clearRefreshCookie(res);
+  return sendSuccess(res, null, 'Password changed successfully', 200);
 };

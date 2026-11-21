@@ -1,5 +1,4 @@
-require("dotenv").config();
-
+require("./config/env");
 const app = require("./app");
 const db = require("./prismaClient");
 
@@ -19,10 +18,9 @@ async function startServer() {
       process.exit(1);
     });
   } catch (error) {
-    console.error("Failed to connect to the database:", error.message || error);
+    console.error("Failed to start the server:", error.message || error);
     process.exit(1);
   }
 }
 
 startServer();
-
