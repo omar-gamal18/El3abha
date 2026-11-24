@@ -21,8 +21,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'bb6030eca87beb2c0fd6de924503affbbaf9701256feb39bfb6e883825a69e6c'>;
-export type ExecutionHash = ExecutionHashBase<string>;
+  StorageHashBase<'24971bfc64633f0f9d77dd5c897fe8585cbc6dd385dcdbf4509a3f489903cdf6'>;
+export type ExecutionHash =
+  ExecutionHashBase<'2a833ca6fa1eb3f5e98dfebffed0f98c8eb21b2c62cfa5d856b094f7af80f8f1'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -248,7 +249,37 @@ export type FieldOutputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
-      readonly role: 'player' | 'owner' | 'admin';
+      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    };
+    readonly Venue: {
+      readonly bookingDuration: CodecTypes['pg/int4@1']['output'];
+      readonly city: CodecTypes['pg/text@1']['output'];
+      readonly closingTime: CodecTypes['pg/text@1']['output'];
+      readonly contactPhone: CodecTypes['pg/text@1']['output'];
+      readonly createdAt: TimestampString<3>;
+      readonly description: CodecTypes['pg/text@1']['output'];
+      readonly facilities: ReadonlyArray<
+        'floodlights' | 'parking' | 'changing_rooms' | 'showers' | 'water' | 'ball_included'
+      > | null;
+      readonly hourlyPrice: CodecTypes['pg/int4@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly latitude: CodecTypes['pg/float8@1']['output'] | null;
+      readonly longitude: CodecTypes['pg/float8@1']['output'] | null;
+      readonly name: CodecTypes['pg/text@1']['output'];
+      readonly neighborhood: CodecTypes['pg/text@1']['output'];
+      readonly openingTime: CodecTypes['pg/text@1']['output'];
+      readonly ownerId: CodecTypes['pg/int4@1']['output'];
+      readonly photos: ReadonlyArray<CodecTypes['pg/text@1']['output']> | null;
+      readonly pitchSize:
+        'five_a_side' | 'six_a_side' | 'seven_a_side' | 'nine_a_side' | 'eleven_a_side';
+      readonly rejectionReason: CodecTypes['pg/text@1']['output'] | null;
+      readonly sportCategory:
+        'football' | 'padel' | 'basketball' | 'tennis' | 'squash' | 'volleyball';
+      readonly status: 'pending' | 'approved' | 'rejected';
+      readonly streetAddress: CodecTypes['pg/text@1']['output'];
+      readonly surface: 'artificial_turf' | 'natural_grass' | 'indoor' | 'concrete';
+      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -266,7 +297,37 @@ export type FieldInputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
-      readonly role: 'player' | 'owner' | 'admin';
+      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    };
+    readonly Venue: {
+      readonly bookingDuration: CodecTypes['pg/int4@1']['input'];
+      readonly city: CodecTypes['pg/text@1']['input'];
+      readonly closingTime: CodecTypes['pg/text@1']['input'];
+      readonly contactPhone: CodecTypes['pg/text@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly description: CodecTypes['pg/text@1']['input'];
+      readonly facilities: ReadonlyArray<
+        'floodlights' | 'parking' | 'changing_rooms' | 'showers' | 'water' | 'ball_included'
+      > | null;
+      readonly hourlyPrice: CodecTypes['pg/int4@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly latitude: CodecTypes['pg/float8@1']['input'] | null;
+      readonly longitude: CodecTypes['pg/float8@1']['input'] | null;
+      readonly name: CodecTypes['pg/text@1']['input'];
+      readonly neighborhood: CodecTypes['pg/text@1']['input'];
+      readonly openingTime: CodecTypes['pg/text@1']['input'];
+      readonly ownerId: CodecTypes['pg/int4@1']['input'];
+      readonly photos: ReadonlyArray<CodecTypes['pg/text@1']['input']> | null;
+      readonly pitchSize:
+        'five_a_side' | 'six_a_side' | 'seven_a_side' | 'nine_a_side' | 'eleven_a_side';
+      readonly rejectionReason: CodecTypes['pg/text@1']['input'] | null;
+      readonly sportCategory:
+        'football' | 'padel' | 'basketball' | 'tennis' | 'squash' | 'volleyball';
+      readonly status: 'pending' | 'approved' | 'rejected';
+      readonly streetAddress: CodecTypes['pg/text@1']['input'];
+      readonly surface: 'artificial_turf' | 'natural_grass' | 'indoor' | 'concrete';
+      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -284,7 +345,37 @@ export type StorageColumnTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['output'];
       readonly phone: CodecTypes['pg/text@1']['output'];
-      readonly role: 'player' | 'owner' | 'admin';
+      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    };
+    readonly Venue: {
+      readonly bookingDuration: CodecTypes['pg/int4@1']['output'];
+      readonly city: CodecTypes['pg/text@1']['output'];
+      readonly closingTime: CodecTypes['pg/text@1']['output'];
+      readonly contactPhone: CodecTypes['pg/text@1']['output'];
+      readonly createdAt: TimestampString<3>;
+      readonly description: CodecTypes['pg/text@1']['output'];
+      readonly facilities: ReadonlyArray<
+        'floodlights' | 'parking' | 'changing_rooms' | 'showers' | 'water' | 'ball_included'
+      > | null;
+      readonly hourlyPrice: CodecTypes['pg/int4@1']['output'];
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly isActive: CodecTypes['pg/bool@1']['output'];
+      readonly latitude: CodecTypes['pg/float8@1']['output'] | null;
+      readonly longitude: CodecTypes['pg/float8@1']['output'] | null;
+      readonly name: CodecTypes['pg/text@1']['output'];
+      readonly neighborhood: CodecTypes['pg/text@1']['output'];
+      readonly openingTime: CodecTypes['pg/text@1']['output'];
+      readonly ownerId: CodecTypes['pg/int4@1']['output'];
+      readonly photos: ReadonlyArray<CodecTypes['pg/text@1']['output']> | null;
+      readonly pitchSize:
+        'five_a_side' | 'six_a_side' | 'seven_a_side' | 'nine_a_side' | 'eleven_a_side';
+      readonly rejectionReason: CodecTypes['pg/text@1']['output'] | null;
+      readonly sportCategory:
+        'football' | 'padel' | 'basketball' | 'tennis' | 'squash' | 'volleyball';
+      readonly status: 'pending' | 'approved' | 'rejected';
+      readonly streetAddress: CodecTypes['pg/text@1']['output'];
+      readonly surface: 'artificial_turf' | 'natural_grass' | 'indoor' | 'concrete';
+      readonly updatedAt: TimestampString<3>;
     };
   };
 };
@@ -302,7 +393,37 @@ export type StorageColumnInputTypes = {
       readonly passwordResetToken: CodecTypes['pg/text@1']['input'] | null;
       readonly passwordResetVerified: CodecTypes['pg/bool@1']['input'];
       readonly phone: CodecTypes['pg/text@1']['input'];
-      readonly role: 'player' | 'owner' | 'admin';
+      readonly role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    };
+    readonly Venue: {
+      readonly bookingDuration: CodecTypes['pg/int4@1']['input'];
+      readonly city: CodecTypes['pg/text@1']['input'];
+      readonly closingTime: CodecTypes['pg/text@1']['input'];
+      readonly contactPhone: CodecTypes['pg/text@1']['input'];
+      readonly createdAt: CodecTypes['pg/timestamp-string@1']['input'];
+      readonly description: CodecTypes['pg/text@1']['input'];
+      readonly facilities: ReadonlyArray<
+        'floodlights' | 'parking' | 'changing_rooms' | 'showers' | 'water' | 'ball_included'
+      > | null;
+      readonly hourlyPrice: CodecTypes['pg/int4@1']['input'];
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly isActive: CodecTypes['pg/bool@1']['input'];
+      readonly latitude: CodecTypes['pg/float8@1']['input'] | null;
+      readonly longitude: CodecTypes['pg/float8@1']['input'] | null;
+      readonly name: CodecTypes['pg/text@1']['input'];
+      readonly neighborhood: CodecTypes['pg/text@1']['input'];
+      readonly openingTime: CodecTypes['pg/text@1']['input'];
+      readonly ownerId: CodecTypes['pg/int4@1']['input'];
+      readonly photos: ReadonlyArray<CodecTypes['pg/text@1']['input']> | null;
+      readonly pitchSize:
+        'five_a_side' | 'six_a_side' | 'seven_a_side' | 'nine_a_side' | 'eleven_a_side';
+      readonly rejectionReason: CodecTypes['pg/text@1']['input'] | null;
+      readonly sportCategory:
+        'football' | 'padel' | 'basketball' | 'tennis' | 'squash' | 'volleyball';
+      readonly status: 'pending' | 'approved' | 'rejected';
+      readonly streetAddress: CodecTypes['pg/text@1']['input'];
+      readonly surface: 'artificial_turf' | 'natural_grass' | 'indoor' | 'concrete';
+      readonly updatedAt: CodecTypes['pg/timestamp-string@1']['input'];
     };
   };
 };
@@ -320,14 +441,46 @@ export namespace Models {
     passwordResetToken: CodecTypes['pg/text@1']['output'] | null;
     passwordResetVerified: CodecTypes['pg/bool@1']['output'];
     phone: CodecTypes['pg/text@1']['output'];
-    role: 'player' | 'owner' | 'admin';
-    readonly [RelationKeys]?: never;
+    role: 'PLAYER' | 'OWNER' | 'ADMIN';
+    venues: public_Venue[];
+    readonly [RelationKeys]?: 'venues';
+  };
+  export type public_Venue = {
+    bookingDuration: CodecTypes['pg/int4@1']['output'];
+    city: CodecTypes['pg/text@1']['output'];
+    closingTime: CodecTypes['pg/text@1']['output'];
+    contactPhone: CodecTypes['pg/text@1']['output'];
+    createdAt: TimestampString<3>;
+    description: CodecTypes['pg/text@1']['output'];
+    facilities: ReadonlyArray<
+      'floodlights' | 'parking' | 'changing_rooms' | 'showers' | 'water' | 'ball_included'
+    > | null;
+    hourlyPrice: CodecTypes['pg/int4@1']['output'];
+    id: CodecTypes['pg/int4@1']['output'];
+    isActive: CodecTypes['pg/bool@1']['output'];
+    latitude: CodecTypes['pg/float8@1']['output'] | null;
+    longitude: CodecTypes['pg/float8@1']['output'] | null;
+    name: CodecTypes['pg/text@1']['output'];
+    neighborhood: CodecTypes['pg/text@1']['output'];
+    openingTime: CodecTypes['pg/text@1']['output'];
+    ownerId: CodecTypes['pg/int4@1']['output'];
+    photos: ReadonlyArray<CodecTypes['pg/text@1']['output']> | null;
+    pitchSize: 'five_a_side' | 'six_a_side' | 'seven_a_side' | 'nine_a_side' | 'eleven_a_side';
+    rejectionReason: CodecTypes['pg/text@1']['output'] | null;
+    sportCategory: 'football' | 'padel' | 'basketball' | 'tennis' | 'squash' | 'volleyball';
+    status: 'pending' | 'approved' | 'rejected';
+    streetAddress: CodecTypes['pg/text@1']['output'];
+    surface: 'artificial_turf' | 'natural_grass' | 'indoor' | 'concrete';
+    updatedAt: TimestampString<3>;
+    owner: public_User;
+    readonly [RelationKeys]?: 'owner';
   };
 }
 
 export declare const models: {
   public: {
     User: Models.public_User;
+    Venue: Models.public_Venue;
   };
 };
 
@@ -461,11 +614,264 @@ type ContractBase = Omit<
               ];
               foreignKeys: readonly [];
             };
+            readonly Venue: {
+              columns: {
+                readonly bookingDuration: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 60>;
+                  };
+                  readonly many: false;
+                };
+                readonly city: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly closingTime: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', '03:00'>;
+                  };
+                  readonly many: false;
+                };
+                readonly contactPhone: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly description: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly facilities: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: true;
+                  readonly typeParams: { readonly typeName: 'Facility' };
+                  readonly many: { readonly elementNullable: false };
+                };
+                readonly hourlyPrice: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly isActive: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
+                readonly latitude: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly longitude: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly neighborhood: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly openingTime: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', '12:00'>;
+                  };
+                  readonly many: false;
+                };
+                readonly ownerId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly photos: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: { readonly elementNullable: false };
+                };
+                readonly pitchSize: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'PitchSize' };
+                  readonly many: false;
+                };
+                readonly rejectionReason: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly sportCategory: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'SportCategory' };
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/enum@1', 'pending'>;
+                  };
+                  readonly typeParams: { readonly typeName: 'VenueStatus' };
+                  readonly many: false;
+                };
+                readonly streetAddress: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly surface: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'PitchSurface' };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamp';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Venue_city_neighborhood_idx';
+                  readonly columns: readonly ['city', 'neighborhood'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Venue_ownerId_idx';
+                  readonly columns: readonly ['ownerId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Venue_status_isActive_idx';
+                  readonly columns: readonly ['status', 'isActive'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Venue';
+                    readonly columns: readonly ['ownerId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
           };
           readonly valueSet: {
+            readonly Facility: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'floodlights',
+                'parking',
+                'changing_rooms',
+                'showers',
+                'water',
+                'ball_included',
+              ];
+            };
+            readonly PitchSize: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'five_a_side',
+                'six_a_side',
+                'seven_a_side',
+                'nine_a_side',
+                'eleven_a_side',
+              ];
+            };
+            readonly PitchSurface: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['artificial_turf', 'natural_grass', 'indoor', 'concrete'];
+            };
+            readonly SportCategory: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'football',
+                'padel',
+                'basketball',
+                'tennis',
+                'squash',
+                'volleyball',
+              ];
+            };
             readonly UserRole: {
               readonly kind: 'valueSet';
-              readonly values: readonly ['player', 'owner', 'admin'];
+              readonly values: readonly ['PLAYER', 'OWNER', 'ADMIN'];
+            };
+            readonly VenueStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['pending', 'approved', 'rejected'];
             };
           };
         };
@@ -479,6 +885,7 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+    readonly Venue: { readonly namespace: 'public' & NamespaceId; readonly model: 'Venue' };
   };
   readonly domain: {
     readonly namespaces: {
@@ -547,7 +954,19 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly venues: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Venue';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['ownerId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'User';
               readonly namespaceId: 'public';
@@ -564,6 +983,177 @@ type ContractBase = Omit<
                 readonly passwordResetVerified: { readonly column: 'passwordResetVerified' };
                 readonly phone: { readonly column: 'phone' };
                 readonly role: { readonly column: 'role' };
+              };
+            };
+          };
+          readonly Venue: {
+            readonly fields: {
+              readonly bookingDuration: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly city: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly closingTime: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly contactPhone: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly description: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly facilities: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'Facility' };
+                };
+                readonly many: { readonly elementNullable: false };
+              };
+              readonly hourlyPrice: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly isActive: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly latitude: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly longitude: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly neighborhood: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly openingTime: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly ownerId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly photos: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
+              readonly pitchSize: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'PitchSize' };
+                };
+              };
+              readonly rejectionReason: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly sportCategory: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'SportCategory' };
+                };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'VenueStatus' };
+                };
+              };
+              readonly streetAddress: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly surface: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'PitchSurface' };
+                };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamp-string@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly owner: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['ownerId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Venue';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly bookingDuration: { readonly column: 'bookingDuration' };
+                readonly city: { readonly column: 'city' };
+                readonly closingTime: { readonly column: 'closingTime' };
+                readonly contactPhone: { readonly column: 'contactPhone' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly description: { readonly column: 'description' };
+                readonly facilities: { readonly column: 'facilities' };
+                readonly hourlyPrice: { readonly column: 'hourlyPrice' };
+                readonly id: { readonly column: 'id' };
+                readonly isActive: { readonly column: 'isActive' };
+                readonly latitude: { readonly column: 'latitude' };
+                readonly longitude: { readonly column: 'longitude' };
+                readonly name: { readonly column: 'name' };
+                readonly neighborhood: { readonly column: 'neighborhood' };
+                readonly openingTime: { readonly column: 'openingTime' };
+                readonly ownerId: { readonly column: 'ownerId' };
+                readonly photos: { readonly column: 'photos' };
+                readonly pitchSize: { readonly column: 'pitchSize' };
+                readonly rejectionReason: { readonly column: 'rejectionReason' };
+                readonly sportCategory: { readonly column: 'sportCategory' };
+                readonly status: { readonly column: 'status' };
+                readonly streetAddress: { readonly column: 'streetAddress' };
+                readonly surface: { readonly column: 'surface' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -599,6 +1189,22 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
+  readonly execution: {
+    readonly executionHash: ExecutionHash;
+    readonly mutations: {
+      readonly defaults: readonly [
+        {
+          readonly onCreate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'timestampNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'Venue';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+      ];
+    };
+  };
   readonly meta: {};
 
   readonly profileHash: ProfileHash;

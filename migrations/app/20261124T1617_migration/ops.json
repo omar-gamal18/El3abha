@@ -1,0 +1,310 @@
+[
+  {
+    "id": "createNativeEnumType.Facility",
+    "label": "Create enum type \"Facility\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "Facility"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"Facility\"",
+        "sql": "CREATE TYPE \"public\".\"Facility\" AS ENUM ('floodlights', 'parking', 'changing_rooms', 'showers', 'water', 'ball_included')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.PitchSize",
+    "label": "Create enum type \"PitchSize\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "PitchSize"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"PitchSize\"",
+        "sql": "CREATE TYPE \"public\".\"PitchSize\" AS ENUM ('five_a_side', 'six_a_side', 'seven_a_side', 'nine_a_side', 'eleven_a_side')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.PitchSurface",
+    "label": "Create enum type \"PitchSurface\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "PitchSurface"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"PitchSurface\"",
+        "sql": "CREATE TYPE \"public\".\"PitchSurface\" AS ENUM ('artificial_turf', 'natural_grass', 'indoor', 'concrete')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.SportCategory",
+    "label": "Create enum type \"SportCategory\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "SportCategory"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"SportCategory\"",
+        "sql": "CREATE TYPE \"public\".\"SportCategory\" AS ENUM ('football', 'padel', 'basketball', 'tennis', 'squash', 'volleyball')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.VenueStatus",
+    "label": "Create enum type \"VenueStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "VenueStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"VenueStatus\"",
+        "sql": "CREATE TYPE \"public\".\"VenueStatus\" AS ENUM ('pending', 'approved', 'rejected')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Venue",
+    "label": "Create table \"Venue\"",
+    "summary": "Creates table \"Venue\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Venue\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Venue\"",
+        "sql": "CREATE TABLE \"public\".\"Venue\" (\n  \"bookingDuration\" int4 DEFAULT 60 NOT NULL,\n  \"city\" text NOT NULL,\n  \"closingTime\" text DEFAULT '03:00' NOT NULL,\n  \"contactPhone\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"description\" text NOT NULL,\n  \"facilities\" \"Facility\"[],\n  \"hourlyPrice\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"latitude\" float8,\n  \"longitude\" float8,\n  \"name\" text NOT NULL,\n  \"neighborhood\" text NOT NULL,\n  \"openingTime\" text DEFAULT '12:00' NOT NULL,\n  \"ownerId\" int4 NOT NULL,\n  \"photos\" text[],\n  \"pitchSize\" \"PitchSize\" NOT NULL,\n  \"rejectionReason\" text,\n  \"sportCategory\" \"SportCategory\" NOT NULL,\n  \"status\" \"VenueStatus\" DEFAULT 'pending'::\"VenueStatus\" NOT NULL,\n  \"streetAddress\" text NOT NULL,\n  \"surface\" \"PitchSurface\" NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Venue\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Venue.Venue_city_neighborhood_idx",
+    "label": "Create index \"Venue_city_neighborhood_idx\" on \"Venue\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Venue_city_neighborhood_idx",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Venue_city_neighborhood_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_city_neighborhood_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Venue_city_neighborhood_idx\"",
+        "sql": "CREATE INDEX \"Venue_city_neighborhood_idx\" ON \"public\".\"Venue\" (\"city\", \"neighborhood\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Venue_city_neighborhood_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_city_neighborhood_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Venue.Venue_ownerId_idx",
+    "label": "Create index \"Venue_ownerId_idx\" on \"Venue\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Venue_ownerId_idx",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Venue_ownerId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_ownerId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Venue_ownerId_idx\"",
+        "sql": "CREATE INDEX \"Venue_ownerId_idx\" ON \"public\".\"Venue\" (\"ownerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Venue_ownerId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_ownerId_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Venue.Venue_status_isActive_idx",
+    "label": "Create index \"Venue_status_isActive_idx\" on \"Venue\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Venue_status_isActive_idx",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Venue_status_isActive_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_status_isActive_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Venue_status_isActive_idx\"",
+        "sql": "CREATE INDEX \"Venue_status_isActive_idx\" ON \"public\".\"Venue\" (\"status\", \"isActive\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Venue_status_isActive_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Venue_status_isActive_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Venue.Venue_ownerId_fkey",
+    "label": "Add foreign key \"Venue_ownerId_fkey\" on \"Venue\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Venue_ownerId_fkey",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Venue_ownerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Venue_ownerId_fkey",
+          "public",
+          "\"public\".\"Venue\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Venue_ownerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Venue\"\nADD CONSTRAINT \"Venue_ownerId_fkey\"\nFOREIGN KEY (\"ownerId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Venue_ownerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Venue_ownerId_fkey",
+          "public",
+          "\"public\".\"Venue\""
+        ]
+      }
+    ]
+  }
+]
