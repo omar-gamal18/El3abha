@@ -6,6 +6,7 @@ const {
   rejectVenue,
   pauseVenue,
   resumeVenue,
+  getMyVenue,
 } = require("../controllers/venue.controller");
 
 // const {} = require("../validators/venue.validator");
@@ -14,6 +15,7 @@ const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
 const router = Router();
 
+router.patch("/:id/my", protect, allowedTo("owner"), getMyVenue);
 router.patch("/:id/pause", protect, allowedTo("owner"), pauseVenue);
 router.patch("/:id/resume", protect, allowedTo("owner"), resumeVenue);
 
