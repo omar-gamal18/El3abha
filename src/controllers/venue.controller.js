@@ -24,6 +24,20 @@ const findOwnedVenue = async (req) => {
   return venue;
 };
 
+exports.getAllVenues = async (req, res, next) => {
+  const venues = await Venue.where({
+    status: "approved",
+    isActive: true,
+  }).all();
+
+  return sendSuccess(
+    res,
+    { results: venues.length, data: { venues } },
+    "data retrieved successfully",
+    200,
+  );
+};
+
 exports.getMyVenue = async (req, res, next) => {
   const venues = await Venue.whereUnique({ ownerId: req.user.id }).all();
   return sendSuccess(

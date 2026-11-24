@@ -1,6 +1,7 @@
 const { Router } = require("express");
 
 const {
+  getAllVenues,
   getAllVenuesAdmin,
   approveVenue,
   rejectVenue,
@@ -15,13 +16,18 @@ const { protect, allowedTo } = require("../middlewares/auth.middleware");
 
 const router = Router();
 
-router.patch("/:id/my", protect, allowedTo("owner"), getMyVenue);
-router.patch("/:id/pause", protect, allowedTo("owner"), pauseVenue);
-router.patch("/:id/resume", protect, allowedTo("owner"), resumeVenue);
+router.get("/", getAllVenues);
 
-router.get("/admin/all", protect, allowedTo("admin"), getAllVenuesAdmin);
+router.use(protect);
 
-router.patch("/:id/approve", protect, allowedTo("admin"), approveVenue);
-router.patch("/:id/reject", protect, allowedTo("admin"), rejectVenue);
+router.patch("/:id/my", allowedTo("owner"), getMyVenue);
+router.patch("/:id/pause", allowedTo("owner"), pauseVenue);
+router.patch("/:id/resume", allowedTo("owner"), resumeVenue);
+
+router.use(allowedTo("admin"));
+
+router.get("/admin/all", getAllVenuesAdmin);
+router.patch("/:id/approve", approveVenue);
+router.patch("/:id/reject", rejectVenue);
 
 module.exports = router;
