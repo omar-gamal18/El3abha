@@ -14,3 +14,18 @@ exports.getAllVenuesAdmin = async (req, res, next) => {
     200,
   );
 };
+
+exports.approveVenue = async (req, res, next) => {
+  const { id } = +req.params;
+
+  const venue = await Venue.whereUnique({ id }).update({
+    status: "approved",
+  });
+
+  return sendSuccess(
+    res,
+    { data: { venue } },
+    "Venue approved successfully",
+    200,
+  );
+};

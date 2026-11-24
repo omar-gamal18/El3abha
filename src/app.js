@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const notFound = require("./middlewares/notFound.middleware");
 const errorHandler = require("./middlewares/errorHandler.middleware");
 const authRouter = require("./routes/auth.route");
-const venueRoutes = require("./routes/venueRoutes");
+const venueRoutes = require("./routes/venue.route");
 
 const app = express();
 
