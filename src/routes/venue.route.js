@@ -14,5 +14,6 @@ const router = Router();
 router.get("/admin", protect, allowedTo("admin"), getAllVenuesAdmin);
 
 router.patch("/:id/approve", protect, allowedTo("admin"), approveVenue);
+router.patch("/:id/reject", protect, allowedTo("admin"), rejectVenue);
 
 module.exports = router;

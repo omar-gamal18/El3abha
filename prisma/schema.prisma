@@ -59,7 +59,7 @@ model Venue {
     closingTime String     @default("03:00")
 
     status          VenueStatus @default(pending)
-    isActive        Boolean     @default(true) // false = paused by owner
+    isActive        Boolean     @default(true)
     rejectionReason String?
 
     createdAt DateTime @default(now())
