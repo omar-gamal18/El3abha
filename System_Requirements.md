@@ -256,18 +256,37 @@ Error response:
 
 ### 6.2 Required endpoint groups
 
-| Group                | Routes/capabilities                                                                                                                                                                                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth                 | `POST /auth/register`, `/login`, `/google`, `/refresh`, `/logout`; `GET/PATCH /auth/me`; OTP request/resend/verify/reset routes                                                                     |
-| Public venues        | `GET /venues` (search/list), `GET /venues/:id`, `GET /venues/:id/availability?date=YYYY-MM-DD`, `GET /venues/:id/reviews`                                                                           |
-| Favorites            | `GET /favorites`, `POST /favorites/:venueId`, `DELETE /favorites/:venueId`                                                                                                                          |
-| Owner venues         | `POST /owner/venues` (multipart), `GET /owner/venues`, `PUT /owner/venues/:id`, `DELETE /owner/venues/:id`; photo operations as required by the form                                                |
-| Owner availability   | Slot CRUD under `/owner/venues/:id/slots`; block/list/unblock under `/owner/venues/:id/blocked-slots`                                                                                               |
-| Bookings             | `POST /bookings`, `POST /bookings/:id/receipt` (multipart), `GET /bookings/my`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel`                                                                   |
-| Owner bookings       | `GET /owner/bookings`, owner confirm/reject actions, owner-scoped booking detail/check-in fields                                                                                                    |
-| Player notifications | `GET /notifications`, `GET /notifications/unread-count`, mark one/all read                                                                                                                          |
-| Owner dashboard      | Owner summary, listing performance, earnings/transactions, payout-account read/update                                                                                                               |
-| Admin                | Users/owners and verification, venue queue/approve/reject, booking list/detail/actions, categories CRUD, complaint list/detail/resolve, reports/download, settings read/update, activity/audit list |
+| Group                                                                                                                           | Routes/capabilities |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Auth                                                                                                                            |
+| `POST /auth/register`, `/login`, `/google`, `/refresh`, `/logout`; `GET/PATCH /auth/me`; OTP request/resend/verify/reset routes |
+
+| Public venues  
+| `GET /venues` (search/list), `GET /venues/:id`, `GET /venues/:id/availability?date=YYYY-MM-DD`, `GET /venues/:id/reviews`
+
+| Favorites  
+| `GET /favorites`, `POST /favorites/:venueId`, `DELETE /favorites/:venueId`
+
+| Owner venues
+| `POST /owner/venues` (multipart), `GET /owner/venues`, `PUT /owner/venues/:id`, `DELETE /owner/venues/:id`; photo operations as required by the form
+
+| Owner availability  
+| Slot CRUD under `/owner/venues/:id/slots`; block/list/unblock under `/owner/venues/:id/blocked-slots`
+
+| Bookings  
+| `POST /bookings`, `POST /bookings/:id/receipt` (multipart), `GET /bookings/my`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel`
+
+| Owner bookings  
+| `GET /owner/bookings`, owner confirm/reject actions, owner-scoped booking detail/check-in fields
+
+| Player notifications
+| `GET /notifications`, `GET /notifications/unread-count`, mark one/all read
+
+| Owner dashboard  
+| Owner summary, listing performance, earnings/transactions, payout-account read/update
+
+| Admin  
+| Users/owners and verification, venue queue/approve/reject, booking list/detail/actions, categories CRUD, complaint list/detail/resolve, reports/download, settings read/update, activity/audit list
 
 The exact route spelling for OTP, category actions, complaints, payout account, reports, and settings is finalized in Swagger before frontend integration. It must not change the required data or introduce UI controls absent from Figma.
 
@@ -285,25 +304,52 @@ The exact route spelling for OTP, category actions, complaints, payout account, 
 
 IDs may be UUIDs; use `createdAt`/`updatedAt` consistently and `deletedAt` only for soft-deleted entities. Monetary fields use fixed precision/minor units with `currency = EGP`.
 
-| Entity             | Key fields and constraints                                                                                                                                                                                                                                  |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `User`             | id, name, unique email, phone, passwordHash or Google subject, role, isActive, ownerVerificationStatus, createdAt, updatedAt, deletedAt                                                                                                                     |
-| `RefreshSession`   | id, userId, tokenHash, expiresAt, revokedAt, createdAt; never store raw refresh token                                                                                                                                                                       |
-| `PasswordResetOtp` | id, userId, codeHash, expiresAt, usedAt, attemptCount, createdAt; one-time and rate-limited                                                                                                                                                                 |
-| `Venue`            | id, ownerId, name, sportCategoryId, city/address, optional lat/lng/map URL, contact phone, private InstaPay recipient/name, hourly price, description, facilities, approval state/reason/reviewer/time, deletedAt                                           |
-| `VenuePhoto`       | id, venueId, URL/storage key, display order; at least one active photo for publishing                                                                                                                                                                       |
-| `SportCategory`    | id, name, description/rules as confirmed by form, active state; unique normalized name                                                                                                                                                                      |
-| `SlotTemplate`     | id, venueId, weekday, start/end local time, optional price override, active state; no overlap within venue/day                                                                                                                                              |
-| `BlockedSlot`      | id, venueId, date, optional slot/time range, reason; cannot overlap active booking                                                                                                                                                                          |
-| `Booking`          | id, public reference, playerId, venueId, slotId, date/start/end snapshots, venueFee, serviceFee, totalAmount, currency, recipient/name snapshots, state, holdExpiresAt, receipt URL/hash, submittedAt, reviewerId, decision/reason, cancelledBy, timestamps |
-| `Review`           | id, venueId, playerId, rating, comment, createdAt, deletedAt; read for Stadium Details; write flow is outside current UI scope                                                                                                                              |
-| `Favorite`         | playerId, venueId, createdAt; unique `(playerId, venueId)`                                                                                                                                                                                                  |
-| `Notification`     | id, userId, type, message, related entity, isRead, createdAt                                                                                                                                                                                                |
-| `PlatformSetting`  | key, validated value, updatedBy, updatedAt; fee/policy and notification settings                                                                                                                                                                            |
-| `Complaint`        | id, reference, category/title/description fields as confirmed, status, resolution, timestamps, resolver; no new public intake UI implied                                                                                                                    |
-| `PayoutAccount`    | ownerId, provider/display fields confirmed by design, protected account reference, updatedAt; no automatic payout integration                                                                                                                               |
-| `Transaction`      | booking/owner reference, amount components, review/confirmation state, timestamps; represents recorded booking activity, not gateway settlement                                                                                                             |
-| `AuditLog`         | actorId, action, entity type/id, metadata, createdAt; append-only                                                                                                                                                                                           |
+| Entity                                                                                                                                  | Key fields and constraints |
+| --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `User`                                                                                                                                  |
+| id, name, unique email, phone, passwordHash or Google subject, role, isActive, ownerVerificationStatus, createdAt, updatedAt, deletedAt |
+
+| `Venue` |
+id, ownerId, name, sportCategoryId, city/address, optional lat/lng/map URL, contact phone, private InstaPay recipient/name, hourly price, description, facilities, approval state/reason/reviewer/time, deletedAt |
+
+| `VenuePhoto` |
+id, venueId, URL/storage key, display order; at least one active photo for publishing |
+
+| `SportCategory` |
+id, name, description/rules as confirmed by form, active state; unique normalized name |
+
+| `SlotTemplate` |
+id, venueId, weekday, start/end local time, optional price override, active state; no overlap within venue/day |
+
+| `BlockedSlot` |
+id, venueId, date, optional slot/time range, reason; cannot overlap active booking |
+
+| `Booking` |
+id, public reference, playerId, venueId, slotId, date/start/end snapshots, venueFee, serviceFee, totalAmount, currency, recipient/name snapshots, state, holdExpiresAt, receipt URL/hash, submittedAt, reviewerId, decision/reason, cancelledBy, timestamps |
+
+| `Review` |
+id, venueId, playerId, rating, comment, createdAt, deletedAt; read for Stadium Details; write flow is outside current UI scope |
+
+| `Favorite` |
+playerId, venueId, createdAt; unique `(playerId, venueId)` |
+
+| `Notification` |
+id, userId, type, message, related entity, isRead, createdAt |
+
+| `PlatformSetting` |
+key, validated value, updatedBy, updatedAt; fee/policy and notification settings |
+
+| `Complaint` |
+id, reference, category/title/description fields as confirmed, status, resolution, timestamps, resolver; no new public intake UI implied |
+
+| `PayoutAccount` |
+ownerId, provider/display fields confirmed by design, protected account reference, updatedAt; no automatic payout integration |
+
+| `Transaction` |
+booking/owner reference, amount components, review/confirmation state, timestamps; represents recorded booking activity, not gateway settlement |
+
+| `AuditLog` |
+actorId, action, entity type/id, metadata, createdAt; append-only |
 
 Database guarantees: unique email; unique favorite per Player/Venue; unique public booking reference; partial unique index for active venue slot/date; foreign keys; and appropriate indexes for venue filters, booking history, owner booking lists, and notifications. Use transactions and conditional updates for state changes.
 

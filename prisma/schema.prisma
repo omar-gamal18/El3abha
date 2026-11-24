@@ -20,6 +20,8 @@ model User {
     passwordResetExpires  DateTime?
     passwordResetVerified Boolean   @default(false)
 
+    venues Venue[]
+
     @@index([passwordResetCode])
     @@index([passwordResetToken])
 }
@@ -28,4 +30,81 @@ enum UserRole {
     player
     owner
     admin
+}
+
+model Venue {
+    id      Int  @id @default(autoincrement())
+    ownerId Int
+    owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+    name            String
+    sportCategory   SportCategory
+    pitchSize       PitchSize
+    surface         PitchSurface
+    description     String
+    hourlyPrice     Int
+    bookingDuration Int           @default(60)
+
+    city          String
+    neighborhood  String
+    streetAddress String
+    contactPhone  String
+    latitude      Float?
+    longitude     Float?
+
+    photos String[]
+
+    facilities  Facility[]
+    openingTime String     @default("12:00")
+    closingTime String     @default("03:00")
+
+    status          VenueStatus @default(pending)
+    isActive        Boolean     @default(true) // false = paused by owner
+    rejectionReason String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([ownerId])
+    @@index([city, neighborhood])
+    @@index([status, isActive])
+}
+
+enum SportCategory {
+    football
+    padel
+    basketball
+    tennis
+    squash
+    volleyball
+}
+
+enum PitchSize {
+    five_a_side
+    six_a_side
+    seven_a_side
+    nine_a_side
+    eleven_a_side
+}
+
+enum PitchSurface {
+    artificial_turf
+    natural_grass
+    indoor
+    concrete
+}
+
+enum Facility {
+    floodlights
+    parking
+    changing_rooms
+    showers
+    water
+    ball_included
+}
+
+enum VenueStatus {
+    pending
+    approved
+    rejected
 }

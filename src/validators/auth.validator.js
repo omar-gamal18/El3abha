@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 
-const validate = require("../middlewares/validate");
+const validate = require("../middleware/validateErrors.middleware");
 const AppError = require("../utils/AppError");
 
 const name = body("name")
@@ -37,10 +37,11 @@ const password = body("password")
 
 const role = body("role")
   .trim()
+  .toUpperCase()
   .notEmpty()
   .withMessage("Role is required")
-  .isIn(["player", "owner"])
-  .withMessage("Role must be player or owner");
+  .isIn(["PLAYER", "OWNER"])
+  .withMessage("Role must be PLAYER or OWNER");
 
 exports.registerValidator = [name, email, phone, password, role, validate];
 
@@ -53,7 +54,6 @@ exports.loginValidator = [
 exports.forgotPasswordValidator = [email, validate];
 
 exports.verifyResetCodeValidator = [
-  email,
   body("resetCode")
     .trim()
     .matches(/^\d{6}$/)
@@ -61,4 +61,4 @@ exports.verifyResetCodeValidator = [
   validate,
 ];
 
-exports.resetPasswordValidator = [email, password, validate];
+exports.resetPasswordValidator = [password, validate];

@@ -183,7 +183,7 @@ exports.verifyPassResetCode = async (req, res, next) => {
 };
 
 exports.resetPassword = async (req, res, next) => {
-  const { newPassword } = req.body;
+  const { password } = req.body;
   const resetToken = req.cookies[RESET_COOKIE];
 
   if (!resetToken)
@@ -204,7 +204,7 @@ exports.resetPassword = async (req, res, next) => {
   }
 
   await User.whereUnique({ id: user.id }).update({
-    password: await bcrypt.hash(newPassword, 12),
+    password: await bcrypt.hash(password, 12),
     passwordResetCode: null,
     passwordResetToken: null,
     passwordResetExpires: null,

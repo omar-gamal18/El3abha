@@ -11,7 +11,23 @@ const app = express();
 
 app.use(helmet());
 
-app.use(cors());
+const allowedOrigins = [
+  "https://el3abha.apidog.io", // Apidog docs "Try it out"
+  "http://localhost:3000", // frontend dev (adjust ports)
+  "http://localhost:5173",
+  "https://your-frontend-domain.com",
+];
+
+const corsOptions = {
+  origin: (origin, cb) => {
+    // allow non-browser tools (curl, Postman) which send no Origin
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
