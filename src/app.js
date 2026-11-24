@@ -3,9 +3,9 @@ const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
-const notFound = require("./middleware/notFound.middleware");
-const errorHandler = require("./middleware/errorHandler.middleware");
-const authRoutes = require("./routes/user.route");
+const notFound = require("./middlewares/notFound.middleware");
+const errorHandler = require("./middlewares/errorHandler.middleware");
+const authRouter = require("./routes/auth.route");
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/api/v1/health", (req, res) => res.status(200).send("Home"));
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", authRouter);
 
 app.use(notFound);
 

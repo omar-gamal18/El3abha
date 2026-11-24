@@ -84,7 +84,6 @@ exports.getAll = (Model) => async (req, res, next) => {
     results: docs.length,
     data: {
       [modelName]: docs,
-      // docs,
     },
   });
 };

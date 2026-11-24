@@ -16,9 +16,9 @@ const {
   forgotPasswordValidator,
   verifyResetCodeValidator,
   resetPasswordValidator,
-} = require("../validators/auth.validator");
+} = require("../validators/auth.validator.js");
 
-const { protect } = require("../middleware/auth.middleware.js");
+const { protect } = require("../middlewares/auth.middleware.js");
 
 const router = Router();
 

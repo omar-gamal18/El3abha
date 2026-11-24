@@ -47,6 +47,12 @@ const sendAuthResponse = (res, user, message, statusCode) => {
 exports.signup = async (req, res, next) => {
   const { name, email, phone, password, role } = req.body;
 
+  const check = await User.first({ email });
+
+  if (check) {
+    return next(new AppError("Email already exists", 409));
+  }
+
   const hashedPass = await bcrypt.hash(password, 12);
 
   const user = await User.select("id", "name", "email", "phone", "role").create(

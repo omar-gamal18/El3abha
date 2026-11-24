@@ -264,11 +264,11 @@ Error response:
 | Public venues  
 | `GET /venues` (search/list), `GET /venues/:id`, `GET /venues/:id/availability?date=YYYY-MM-DD`, `GET /venues/:id/reviews`
 
-| Favorites  
-| `GET /favorites`, `POST /favorites/:venueId`, `DELETE /favorites/:venueId`
-
 | Owner venues
 | `POST /owner/venues` (multipart), `GET /owner/venues`, `PUT /owner/venues/:id`, `DELETE /owner/venues/:id`; photo operations as required by the form
+
+| Favorites  
+| `GET /favorites`, `POST /favorites/:venueId`, `DELETE /favorites/:venueId`
 
 | Owner availability  
 | Slot CRUD under `/owner/venues/:id/slots`; block/list/unblock under `/owner/venues/:id/blocked-slots`

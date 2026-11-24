@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 
-const validate = require("../middleware/validateErrors.middleware");
+const validate = require("../middlewares/validateErrors.middleware");
 const AppError = require("../utils/AppError");
 
 const name = body("name")
@@ -63,13 +63,14 @@ exports.verifyResetCodeValidator = [
 
 exports.resetPasswordValidator = [
   password,
-  body("confirm")
+  body("confirmPassword")
     .notEmpty()
     .withMessage("Confirm password is required")
-    .apply((value, { req }) => {
+    .custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new AppError("Passwords do not match", 400);
       }
+      return true;
     }),
   validate,
 ];
