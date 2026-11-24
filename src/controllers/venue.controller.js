@@ -67,7 +67,7 @@ exports.getVenue = async (req, res, next) => {
   );
 };
 
-exports.getMyVenue = async (req, res, next) => {
+exports.getMyVenues = async (req, res, next) => {
   const venues = await Venue.whereUnique({ ownerId: req.user.id }).all();
   return sendSuccess(
     res,
@@ -113,6 +113,18 @@ exports.resumeVenue = async (req, res, next) => {
     "Venue resumed",
     200,
   );
+};
+
+exports.deleteVenue = async (req, res, next) => {
+  const venue = await findOwnedVenue(req);
+
+  const deletedVenue = await Venue.whereUnique({ id: venue.id }).delete();
+
+  if (!venue) {
+    return next(new AppError("No venue found with that ID", 404));
+  }
+
+  return sendSuccess(res, null, "", 204);
 };
 
 exports.getAllVenuesAdmin = async (req, res, next) => {
