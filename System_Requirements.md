@@ -261,31 +261,31 @@ Error response:
 | Auth                                                                                                                            |
 | `POST /auth/register`, `/login`, `/google`, `/refresh`, `/logout`; `GET/PATCH /auth/me`; OTP request/resend/verify/reset routes |
 
-| Public venues  
+| `Public venues`  
 | `GET /venues` (search/list), `GET /venues/:id`, `GET /venues/:id/availability?date=YYYY-MM-DD`, `GET /venues/:id/reviews`
 
-| Owner venues
+| `Owner venues`
 | `POST /owner/venues` (multipart), `GET /owner/venues`, `PUT /owner/venues/:id`, `DELETE /owner/venues/:id`; photo operations as required by the form
 
-| Favorites  
+|` Favorites`  
 | `GET /favorites`, `POST /favorites/:venueId`, `DELETE /favorites/:venueId`
 
-| Owner availability  
+| `Owner availability `
 | Slot CRUD under `/owner/venues/:id/slots`; block/list/unblock under `/owner/venues/:id/blocked-slots`
 
-| Bookings  
+| `Bookings  `
 | `POST /bookings`, `POST /bookings/:id/receipt` (multipart), `GET /bookings/my`, `GET /bookings/:id`, `PATCH /bookings/:id/cancel`
 
-| Owner bookings  
+| `Owner bookings `
 | `GET /owner/bookings`, owner confirm/reject actions, owner-scoped booking detail/check-in fields
 
-| Player notifications
+| `Player notifications`
 | `GET /notifications`, `GET /notifications/unread-count`, mark one/all read
 
-| Owner dashboard  
+| `Owner dashboard  `
 | Owner summary, listing performance, earnings/transactions, payout-account read/update
 
-| Admin  
+| `Admin` |
 | Users/owners and verification, venue queue/approve/reject, booking list/detail/actions, categories CRUD, complaint list/detail/resolve, reports/download, settings read/update, activity/audit list
 
 The exact route spelling for OTP, category actions, complaints, payout account, reports, and settings is finalized in Swagger before frontend integration. It must not change the required data or introduce UI controls absent from Figma.

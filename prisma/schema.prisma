@@ -52,7 +52,7 @@ model Venue {
     latitude      Float?
     longitude     Float?
 
-    photos String[]
+    photos String[] @default([])
 
     facilities  Facility[]
     openingTime String     @default("12:00")

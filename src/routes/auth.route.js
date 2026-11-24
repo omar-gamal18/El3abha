@@ -8,7 +8,7 @@ const {
   resetPassword,
   logout,
   refresh,
-} = require("../controllers/auth.controller.js");
+} = require("../controllers/auth.controller");
 
 const {
   registerValidator,
@@ -16,9 +16,9 @@ const {
   forgotPasswordValidator,
   verifyResetCodeValidator,
   resetPasswordValidator,
-} = require("../validators/auth.validator.js");
+} = require("../validators/auth.validator");
 
-const { protect } = require("../middlewares/auth.middleware.js");
+const { protect } = require("../middlewares/auth.middleware");
 
 const router = Router();
 

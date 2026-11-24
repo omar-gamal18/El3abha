@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const notFound = require("./middlewares/notFound.middleware");
 const errorHandler = require("./middlewares/errorHandler.middleware");
 const authRouter = require("./routes/auth.route");
+const venueRoutes = require("./routes/venueRoutes");
 
 const app = express();
 
@@ -33,7 +34,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/api/v1/health", (req, res) => res.status(200).send("Home"));
+
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/venues", venueRoutes);
 
 app.use(notFound);
 

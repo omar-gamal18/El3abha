@@ -4,8 +4,13 @@ const db = require("../prismaClient");
 
 const Venue = db.orm.public.Venue;
 
-exports.getAllVenues = async (req, res, next) => {
+exports.getAllVenuesAdmin = async (req, res, next) => {
   const venues = await Venue.all();
 
-  senc;
+  return sendSuccess(
+    res,
+    { results: venues.length, data: { venues } },
+    "data retrieved successfully",
+    200,
+  );
 };
