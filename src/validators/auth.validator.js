@@ -61,4 +61,15 @@ exports.verifyResetCodeValidator = [
   validate,
 ];
 
-exports.resetPasswordValidator = [password, validate];
+exports.resetPasswordValidator = [
+  password,
+  body("confirm")
+    .notEmpty()
+    .withMessage("Confirm password is required")
+    .apply((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new AppError("Passwords do not match", 400);
+      }
+    }),
+  validate,
+];
