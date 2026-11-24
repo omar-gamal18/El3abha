@@ -38,6 +38,35 @@ exports.getAllVenues = async (req, res, next) => {
   );
 };
 
+exports.getVenue = async (req, res, next) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id)) {
+    return next(new AppError("Venue ID is required", 400));
+  }
+
+  const venue = await Venue.whereUnique({ id }).first();
+
+  if (!venue) {
+    return next(new AppError("No venue found with that ID", 404));
+  }
+
+  const isPublic = venue.status === "approved" && venue.isActive;
+  const isOwner = req.user && venue.ownerId === req.user.id;
+  const isAdmin = req.user && req.user.role === "admin";
+
+  if (!isPublic && !isOwner && !isAdmin) {
+    return next(new AppError("No venue found with that ID", 404));
+  }
+
+  return sendSuccess(
+    res,
+    { data: { venue } },
+    "data retrieved successfully",
+    200,
+  );
+};
+
 exports.getMyVenue = async (req, res, next) => {
   const venues = await Venue.whereUnique({ ownerId: req.user.id }).all();
   return sendSuccess(

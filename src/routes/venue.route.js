@@ -2,6 +2,7 @@ const { Router } = require("express");
 
 const {
   getAllVenues,
+  getVenue,
   getAllVenuesAdmin,
   approveVenue,
   rejectVenue,
@@ -17,6 +18,7 @@ const { protect, allowedTo } = require("../middlewares/auth.middleware");
 const router = Router();
 
 router.get("/", getAllVenues);
+router.get("/:id", getVenue);
 
 router.use(protect);
 
