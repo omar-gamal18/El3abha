@@ -13,15 +13,13 @@ const app = express();
 app.use(helmet());
 
 const allowedOrigins = [
-  "https://el3abha.apidog.io", // Apidog docs "Try it out"
-  "http://localhost:3000", // frontend dev (adjust ports)
-  "http://localhost:5173",
-  "https://your-frontend-domain.com",
+  "https://el3abha.apidog.io",
+  "http://localhost:3000",
+  "http://localhost:5000",
 ];
 
 const corsOptions = {
   origin: (origin, cb) => {
-    // allow non-browser tools (curl, Postman) which send no Origin
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
     cb(new Error("Not allowed by CORS"));
   },

@@ -11,6 +11,10 @@
     "Venue": {
       "model": "Venue",
       "namespace": "public"
+    },
+    "VenuePhoto": {
+      "model": "VenuePhoto",
+      "namespace": "public"
     }
   },
   "domain": {
@@ -296,16 +300,6 @@
                   "kind": "scalar"
                 }
               },
-              "photos": {
-                "many": {
-                  "elementNullable": false
-                },
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
               "pitchSize": {
                 "nullable": false,
                 "type": {
@@ -387,6 +381,21 @@
                   "model": "User",
                   "namespace": "public"
                 }
+              },
+              "photos": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "venueId"
+                  ]
+                },
+                "to": {
+                  "model": "VenuePhoto",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -439,9 +448,6 @@
                 "ownerId": {
                   "column": "ownerId"
                 },
-                "photos": {
-                  "column": "photos"
-                },
                 "pitchSize": {
                   "column": "pitchSize"
                 },
@@ -466,6 +472,74 @@
               },
               "namespaceId": "public",
               "table": "Venue"
+            }
+          },
+          "VenuePhoto": {
+            "fields": {
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "imageUrl": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "publicId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "venueId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "venue": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "venueId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Venue",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "imageUrl": {
+                  "column": "imageUrl"
+                },
+                "publicId": {
+                  "column": "publicId"
+                },
+                "venueId": {
+                  "column": "venueId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "VenuePhoto"
             }
           }
         }
@@ -717,6 +791,10 @@
                 "facilities": {
                   "codecId": "pg/enum@1",
                   "dataType": "pg/enum",
+                  "default": {
+                    "kind": "literal",
+                    "value": []
+                  },
                   "many": {
                     "elementNullable": false
                   },
@@ -790,17 +868,6 @@
                   "codecId": "pg/int4@1",
                   "dataType": "pg/int4",
                   "nullable": false
-                },
-                "photos": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "many": {
-                    "elementNullable": false
-                  },
-                  "noCheck": [
-                    "elementNotNull"
-                  ],
-                  "nullable": true
                 },
                 "pitchSize": {
                   "codecId": "pg/enum@1",
@@ -935,6 +1002,79 @@
                 ]
               },
               "uniques": []
+            },
+            "VenuePhoto": {
+              "columns": {
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "imageUrl": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "publicId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "venueId": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "VenuePhoto_venueId_idx"
+                  },
+                  "onDelete": "cascade",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "venueId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "VenuePhoto"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Venue"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "publicId"
+                  ],
+                  "name": "VenuePhoto_publicId_key",
+                  "unique": true
+                },
+                {
+                  "columns": [
+                    "venueId"
+                  ],
+                  "name": "VenuePhoto_venueId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
             }
           },
           "valueSet": {
@@ -1001,7 +1141,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "24971bfc64633f0f9d77dd5c897fe8585cbc6dd385dcdbf4509a3f489903cdf6"
+    "storageHash": "6042681c5ba98b476f67e1eaaa3860ea739baa42f3ba8973bb5f67b7823b4a33"
   },
   "execution": {
     "executionHash": "2a833ca6fa1eb3f5e98dfebffed0f98c8eb21b2c62cfa5d856b094f7af80f8f1",

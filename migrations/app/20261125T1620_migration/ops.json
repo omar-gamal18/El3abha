@@ -1,0 +1,245 @@
+[
+  {
+    "id": "dropColumn.Venue.photos",
+    "label": "Drop column \"photos\" from \"Venue\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "photos",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"photos\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Venue",
+          "photos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"photos\"",
+        "sql": "ALTER TABLE \"public\".\"Venue\" DROP COLUMN \"photos\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"photos\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Venue",
+          "photos"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.VenuePhoto",
+    "label": "Create table \"VenuePhoto\"",
+    "summary": "Creates table \"VenuePhoto\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "VenuePhoto"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"VenuePhoto\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"VenuePhoto\"",
+        "sql": "CREATE TABLE \"public\".\"VenuePhoto\" (\n  \"id\" SERIAL NOT NULL,\n  \"imageUrl\" text NOT NULL,\n  \"publicId\" text NOT NULL,\n  \"venueId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"VenuePhoto\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "setDefault.Venue.facilities",
+    "label": "Set default on \"Venue\".\"facilities\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "facilities",
+        "table": "Venue"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"facilities\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Venue",
+          "facilities"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "set default on \"facilities\"",
+        "sql": "ALTER TABLE \"public\".\"Venue\" ALTER COLUMN \"facilities\" SET DEFAULT '{}'"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"facilities\" has a default",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "Venue",
+          "facilities"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.VenuePhoto.VenuePhoto_publicId_key",
+    "label": "Create index \"VenuePhoto_publicId_key\" on \"VenuePhoto\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "VenuePhoto_publicId_key",
+        "table": "VenuePhoto"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"VenuePhoto_publicId_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto_publicId_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"VenuePhoto_publicId_key\"",
+        "sql": "CREATE UNIQUE INDEX \"VenuePhoto_publicId_key\" ON \"public\".\"VenuePhoto\" (\"publicId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"VenuePhoto_publicId_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto_publicId_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.VenuePhoto.VenuePhoto_venueId_idx",
+    "label": "Create index \"VenuePhoto_venueId_idx\" on \"VenuePhoto\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "VenuePhoto_venueId_idx",
+        "table": "VenuePhoto"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"VenuePhoto_venueId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto_venueId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"VenuePhoto_venueId_idx\"",
+        "sql": "CREATE INDEX \"VenuePhoto_venueId_idx\" ON \"public\".\"VenuePhoto\" (\"venueId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"VenuePhoto_venueId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"VenuePhoto_venueId_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.VenuePhoto.VenuePhoto_venueId_fkey",
+    "label": "Add foreign key \"VenuePhoto_venueId_fkey\" on \"VenuePhoto\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "VenuePhoto_venueId_fkey",
+        "table": "VenuePhoto"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"VenuePhoto_venueId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "VenuePhoto_venueId_fkey",
+          "public",
+          "\"public\".\"VenuePhoto\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"VenuePhoto_venueId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"VenuePhoto\"\nADD CONSTRAINT \"VenuePhoto_venueId_fkey\"\nFOREIGN KEY (\"venueId\")\nREFERENCES \"public\".\"Venue\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"VenuePhoto_venueId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "VenuePhoto_venueId_fkey",
+          "public",
+          "\"public\".\"VenuePhoto\""
+        ]
+      }
+    ]
+  }
+]

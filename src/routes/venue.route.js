@@ -10,11 +10,13 @@ const {
   resumeVenue,
   getMyVenues,
   deleteVenue,
+  createVenue,
 } = require("../controllers/venue.controller");
 
 // const {} = require("../validators/venue.validator");
 
 const { protect, allowedTo } = require("../middlewares/auth.middleware");
+const upload = require("../middlewares/upload.middleware");
 
 const router = Router();
 
@@ -24,6 +26,8 @@ router.get("/my", protect, allowedTo("owner"), getMyVenues);
 router.get("/admin/all", protect, allowedTo("admin"), getAllVenuesAdmin);
 
 router.get("/:id", getVenue);
+
+router.post("/", upload.single("image"), createVenue);
 
 router.use(protect);
 

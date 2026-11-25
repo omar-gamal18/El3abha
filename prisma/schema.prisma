@@ -52,11 +52,11 @@ model Venue {
     latitude      Float?
     longitude     Float?
 
-    photos String[] @default([])
+    photos     VenuePhoto[]
+    facilities Facility[]   @default([])
 
-    facilities  Facility[]
-    openingTime String     @default("12:00")
-    closingTime String     @default("03:00")
+    openingTime String @default("12:00")
+    closingTime String @default("03:00")
 
     status          VenueStatus @default(pending)
     isActive        Boolean     @default(true)
@@ -68,6 +68,16 @@ model Venue {
     @@index([ownerId])
     @@index([city, neighborhood])
     @@index([status, isActive])
+}
+
+model VenuePhoto {
+    id       Int    @id @default(autoincrement())
+    imageUrl String
+    publicId String @unique
+    venueId  Int
+    venue    Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+    @@index([venueId])
 }
 
 enum SportCategory {

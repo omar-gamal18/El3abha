@@ -2,6 +2,11 @@ const AppError = require("../utils/AppError");
 const { sendSuccess } = require("../utils/apiResponse");
 const db = require("../prismaClient");
 
+const {
+  uploadToCloudinary,
+  getOptimizedImageUrl,
+} = require("../utils/cloudinary");
+
 const Venue = db.orm.public.Venue;
 
 const findOwnedVenue = async (req) => {
@@ -22,6 +27,19 @@ const findOwnedVenue = async (req) => {
   }
 
   return venue;
+};
+
+exports.createVenue = async (req, res, next) => {
+  try {
+    const result = await uploadToCloudinary(req.file.buffer, "venues");
+
+    const image = {
+      imageUrl: getOptimizedImageUrl(result.public_id),
+      publicId: result.public_id,
+    };
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.getAllVenues = async (req, res, next) => {
