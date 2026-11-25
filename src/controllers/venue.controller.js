@@ -30,14 +30,63 @@ const findOwnedVenue = async (req) => {
 };
 
 exports.createVenue = async (req, res, next) => {
+  let publicId;
+
   try {
     const result = await uploadToCloudinary(req.file.buffer, "venues");
+    publicId = result.public_id;
 
-    const image = {
-      imageUrl: getOptimizedImageUrl(result.public_id),
-      publicId: result.public_id,
-    };
+    const {
+      name,
+      description,
+      sportCategory,
+      pitchSize,
+      surface,
+      hourlyPrice,
+      bookingDuration,
+      city,
+      neighborhood,
+      streetAddress,
+      contactPhone,
+      latitude,
+      longitude,
+      facilities,
+      openingTime,
+      closingTime,
+    } = req.body;
+
+    const venue = await Venue.include("photos").create({
+      ownerId: req.user.id,
+      name,
+      description,
+      sportCategory,
+      pitchSize,
+      surface,
+      hourlyPrice,
+      bookingDuration,
+      city,
+      neighborhood,
+      streetAddress,
+      contactPhone,
+      latitude,
+      longitude,
+      facilities,
+      openingTime,
+      closingTime,
+      photos: (photos) =>
+        photos.create([{ imageUrl: getOptimizedImageUrl(publicId), publicId }]),
+    });
+
+    return sendSuccess(
+      res,
+      { data: { venue } },
+      "venue submitted for approval",
+      201,
+    );
   } catch (error) {
+    if (publicId) {
+      await cloudinary.uploader.destroy(publicId).catch(console.error);
+    }
     next(error);
   }
 };
