@@ -5,6 +5,7 @@ const db = require("../prismaClient");
 const {
   uploadToCloudinary,
   getOptimizedImageUrl,
+  deleteFromCloudinary,
 } = require("../utils/cloudinary");
 
 const Venue = db.orm.public.Venue;
@@ -85,7 +86,7 @@ exports.createVenue = async (req, res, next) => {
     );
   } catch (error) {
     if (publicId) {
-      await cloudinary.uploader.destroy(publicId).catch(console.error);
+      await deleteFromCloudinary(publicId).catch(console.error);
     }
     next(error);
   }
