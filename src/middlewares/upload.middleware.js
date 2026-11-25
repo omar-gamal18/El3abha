@@ -5,10 +5,12 @@ const AppError = require("../utils/AppError");
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new AppError("Only images are allowed", 400), false);
+    cb(new Error("Only JPEG, PNG, and WebP images are allowed"), false);
   }
 };
 
