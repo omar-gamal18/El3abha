@@ -13,7 +13,11 @@ const {
   createVenue,
 } = require("../controllers/venue.controller");
 
-// const {} = require("../validators/venue.validator");
+const {
+  createVenueValidator,
+  venueIdValidator,
+  rejectVenueValidator,
+} = require("../validators/venue.validator");
 
 const { protect, allowedTo } = require("../middlewares/auth.middleware");
 const upload = require("../middlewares/upload.middleware");
@@ -22,22 +26,44 @@ const router = Router();
 
 router.get("/", getAllVenues);
 
-router.get("/my", protect, allowedTo("owner"), getMyVenues);
-router.get("/admin/all", protect, allowedTo("admin"), getAllVenuesAdmin);
+router.get("/my", protect, allowedTo("OWNER"), getMyVenues);
+router.get("/admin/all", protect, allowedTo("ADMIN"), getAllVenuesAdmin);
 
-router.get("/:id", getVenue);
+router.get("/:id", venueIdValidator, getVenue);
 
-router.post("/", upload.single("image"), createVenue);
+router.post(
+  "/",
+  protect,
+  allowedTo("OWNER"),
+  upload.single("image"),
+  createVenueValidator,
+  createVenue,
+);
 
 router.use(protect);
 
-router.patch("/:id/pause", allowedTo("owner", "admin"), pauseVenue);
-router.patch("/:id/resume", allowedTo("owner", "admin"), resumeVenue);
-router.delete("/:id", protect, allowedTo("owner", "admin"), deleteVenue);
+router.patch(
+  "/:id/pause",
+  allowedTo("OWNER", "ADMIN"),
+  venueIdValidator,
+  pauseVenue,
+);
+router.patch(
+  "/:id/resume",
+  allowedTo("OWNER", "ADMIN"),
+  venueIdValidator,
+  resumeVenue,
+);
+router.delete(
+  "/:id",
+  allowedTo("OWNER", "ADMIN"),
+  venueIdValidator,
+  deleteVenue,
+);
 
-router.use(allowedTo("admin"));
+router.use(allowedTo("ADMIN"));
 
-router.patch("/:id/approve", approveVenue);
-router.patch("/:id/reject", rejectVenue);
+router.patch("/:id/approve", venueIdValidator, approveVenue);
+router.patch("/:id/reject", rejectVenueValidator, rejectVenue);
 
 module.exports = router;

@@ -23,7 +23,7 @@ const findOwnedVenue = async (req) => {
     throw new AppError("No venue found with that ID", 404);
   }
 
-  if (venue.ownerId !== req.user.id && req.user.role !== "admin") {
+  if (venue.ownerId !== req.user.id && req.user.role !== "ADMIN") {
     throw new AppError("You are not authorized to perform this action", 403);
   }
 
@@ -121,7 +121,7 @@ exports.getVenue = async (req, res, next) => {
 
   const isPublic = venue.status === "approved" && venue.isActive;
   const isOwner = req.user && venue.ownerId === req.user.id;
-  const isAdmin = req.user && req.user.role === "admin";
+  const isAdmin = req.user && req.user.role === "ADMIN";
 
   if (!isPublic && !isOwner && !isAdmin) {
     return next(new AppError("No venue found with that ID", 404));
@@ -136,7 +136,7 @@ exports.getVenue = async (req, res, next) => {
 };
 
 exports.getMyVenues = async (req, res, next) => {
-  const venues = await Venue.whereUnique({ ownerId: req.user.id }).all();
+  const venues = await Venue.where({ ownerId: req.user.id }).all();
   return sendSuccess(
     res,
     { results: venues.length, data: { venues } },
